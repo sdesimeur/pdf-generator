@@ -119,8 +119,8 @@ class BarcodePDF
 	def draw_card_set(cards, options = {})
 		default_options = {
 			:assembly_geometries => [
-				{:size => 100, :position => [310, 396]},
-				{:size => 100, :position => [400, 500]}
+				{:size => 50, :position => [310, 396]},
+				{:size => 50, :position => [400, 500]}
 			],
 			:assembly_options => {:barcode_size => 100, :assembly_position => {}}
 		}
@@ -154,4 +154,4 @@ pages = {"0" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 barcode.draw_card_set(pages)
 
 #Save to file
-barcode.save "test.pdf"
+barcode.save "test3.pdf"
