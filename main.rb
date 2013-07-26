@@ -26,7 +26,7 @@ class BarcodePDF
 			:barcode_size => 100,
 			:barcode_color => '000000',
 			# scaling and positioning parameters
-			:assembly_scale => 2,
+			:assembly_scale => 0.75,
 			:assembly_position => {:x => 100, :y => 100}
 		}
 		@options = options.merge(default_options)
@@ -123,9 +123,10 @@ end
 barcode = BarcodePDF.new
 pages = {"0" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	"1" => [0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	"2" => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0]}
+	"2" => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0],
+  "3" => [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]}
 
 barcode.draw_barcode_assembly(pages)
 
 #Save to file
-barcode.save "test.pdf"
+barcode.save "test2.pdf"
