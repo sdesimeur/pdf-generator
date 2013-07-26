@@ -57,11 +57,12 @@ class BarcodePDF
 		origin = [options[:assembly_position][:x],
 			options[:page_size][1] - options[:assembly_position][:y] - @height*scale]
 		@pdf.scale scale
-		@pdf.translate (origin[0]-@width/2)/scale.to_f, (origin[1]+@height/2)/scale.to_f
+		@pdf.translate (origin[0])/scale.to_f, (origin[1])/scale.to_f
 		#Draw the boxes
 		fills.each_with_index do |value, index|
-			x = barcode_size*FILL_CODE[index][0]
-			y = @height - (barcode_size*FILL_CODE[index][1])
+			x = barcode_size*(FILL_CODE[index][0] - 2.5)
+			y = @height - (barcode_size*(FILL_CODE[index][1] - 2.5))
+			
 			if value == 1 #Need to be empty, draw white box
 				@pdf.fill_color = "ffffff"
 			else
@@ -76,7 +77,7 @@ class BarcodePDF
 		translate_y = [@height, @height, 0, 0]
 		4.times do |i|
 			@pdf.save_graphics_state
-			@pdf.translate(translate_x[i], translate_y[i])
+			@pdf.translate(translate_x[i] - @width/2.0, translate_y[i] + @height/2.0)
 			@pdf.rotate(angle, :origin => [0, 0]) do 
 
 				#draw the annotation text
@@ -119,8 +120,8 @@ class BarcodePDF
 	def draw_card_set(cards, options = {})
 		default_options = {
 			:assembly_geometries => [
-				{:size => 100, :position => [310, 396]},
-				{:size => 100, :position => [400, 500]}
+				 {:size => 50, :position => [310, 396]},
+    		 {:size => 50, :position => [400, 500]}
 			],
 			:assembly_options => {:barcode_size => 100, :assembly_position => {}}
 		}
