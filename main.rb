@@ -57,7 +57,7 @@ class BarcodePDF
 		origin = [options[:assembly_position][:x],
 			options[:page_size][1] - options[:assembly_position][:y] - @height*scale]
 		@pdf.scale scale
-		@pdf.translate origin[0]/scale.to_f, origin[1]/scale.to_f
+		@pdf.translate (origin[0]-@width/2)/scale.to_f, (origin[1]+@height/2)/scale.to_f
 		#Draw the boxes
 		fills.each_with_index do |value, index|
 			x = barcode_size*FILL_CODE[index][0]
@@ -119,7 +119,7 @@ class BarcodePDF
 	def draw_card_set(cards, options = {})
 		default_options = {
 			:assembly_geometries => [
-				{:size => 100, :position => [40, 40]},
+				{:size => 100, :position => [310, 396]},
 				{:size => 100, :position => [400, 500]}
 			],
 			:assembly_options => {:barcode_size => 100, :assembly_position => {}}
@@ -139,6 +139,7 @@ class BarcodePDF
 			options[:assembly_options][:assembly_position][:x] = assembly_geometry[:position][0]
 			options[:assembly_options][:assembly_position][:y] = assembly_geometry[:position][1]
 			fills = cards[number]
+			options[:assembly_options][:numbers] = [number, number, number, number]
 			draw_barcode_assembly(fills, options[:assembly_options])
 		end
 	end
