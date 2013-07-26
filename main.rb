@@ -11,22 +11,22 @@ class BarcodePDF
 	def initialize(options={})
 		default_options = {
 			# strings to print (one for each side)
-			:annotations => ['www.plickers.com', 'plickers v0.1.4p-3', '', ''],
+			:annotations => ['test1', 'test2', 'test3', 'test4'],
 			:answers => ['A', 'B', 'C', 'D'],
 			:numbers => ['?', '?', '?', '?'],
 			# font options
-			:annotation_font => {:color => '555555', :size => 12, :face => 'Helvetica'},
-			:answer_font => {:color => '333333', :size => 16, :face => 'Times-Roman'},
-			:number_font => {:color => '333333', :size => 32, :face => 'Arial'},
+			:annotation_font => {:color => 'cccccc', :size => 12, :face => 'Helvetica'},
+			:answer_font => {:color => '999999', :size => 16, :face => 'Helvetica'},
+			:number_font => {:color => '999999', :size => 32, :face => 'Helvetica'},
 			# text box positions
 			:annotation_position => {:x => 10, :y => 10},
 			:answer_position => {:x => 0, :y => 10},
 			:number_position => {:x => -10, :y => 10},
 			# barcode parameters
 			:barcode_size => 100,
-			:barcode_color => '000000',
+			:barcode_color => '333333',
 			# scaling and positioning parameters
-			:assembly_scale => 2,
+			:assembly_scale => 0.75,
 			:assembly_position => {:x => 100, :y => 100}
 		}
 		@options = default_options.merge(options)
@@ -87,7 +87,7 @@ class BarcodePDF
 				@pdf.fill_color options[:answer_font][:color]
 				answer = options[:answers][i]
 				@pdf.draw_text answer, 
-					:at => [@width/2 - @pdf.width_of(answer) - options[:answer_position][:x], 
+					:at => [@width/2 - @pdf.width_of(answer)/2 + options[:answer_position][:x], 
 							options[:answer_position][:y]] 
 
 				#draw the number
@@ -123,11 +123,11 @@ end
 
 ###Test
 barcode = BarcodePDF.new
-pages = {"0" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	"1" => [0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	"2" => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0]}
+pages = {"Nolan Amy" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	"Stuart Johnson" => [0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	"Clint McBride" => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0]}
 
 barcode.draw_card_set(pages)
 
 #Save to file
-barcode.save "test.pdf"
+barcode.save "test2.pdf"
