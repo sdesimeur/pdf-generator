@@ -10,6 +10,7 @@ class BarcodePDF
 	]
 	def initialize(options={})
 		default_options = {
+			:page_size => [612, 792],
 			# strings to print (one for each side)
 			:annotations => ['www.plickers.com', 'plickers v0.1.4p-3', '', ''],
 			:answers => ['A', 'B', 'C', 'D'],
@@ -30,11 +31,10 @@ class BarcodePDF
 			:assembly_position => {:x => 100, :y => 100}
 		}
 		@options = default_options.merge(options)
-		@scale = @options[:assembly_scale]
-		@width = @height = @options[:barcode_size] * BARCODE_SIZE
-		@margin = [@options[:assembly_position][:x], 
-			@options[:assembly_position][:y]]
-		@pdf = Prawn::Document.new(:page_size => [(@width + @margin[0]*2)*@scale, (@height + @margin[0]*2)*@scale], :margin => @margin)
+		@margin = [0, 0]
+		@pdf = Prawn::Document.new(:page_size => @options[:page_size], 
+			:margin => [0, 0],
+			:skip_page_creation => true)
 
 		#Update font families
 		#Prawn only supports some fonts:
@@ -49,10 +49,15 @@ class BarcodePDF
 	def draw_barcode_assembly(
 		fills, options = {} #barcode fill-array
 	)
-		barcode_size = @options[:barcode_size]
 		options = @options.merge(options)
-		@pdf.scale @scale
-		
+		barcode_size = options[:barcode_size]
+		@width = @height = barcode_size * BARCODE_SIZE
+		scale = options[:assembly_scale]
+		@pdf.save_graphics_state
+		origin = [options[:assembly_position][:x],
+			options[:page_size][1] - options[:assembly_position][:y] - @height*scale]
+		@pdf.scale scale
+		@pdf.translate origin[0]/scale.to_f, origin[1]/scale.to_f
 		#Draw the boxes
 		fills.each_with_index do |value, index|
 			x = barcode_size*FILL_CODE[index][0]
@@ -87,7 +92,7 @@ class BarcodePDF
 				@pdf.fill_color options[:answer_font][:color]
 				answer = options[:answers][i]
 				@pdf.draw_text answer, 
-					:at => [@width/2 - @pdf.width_of(answer) - options[:answer_position][:x], 
+					:at => [@width/2 - @pdf.width_of(answer)/2 - options[:answer_position][:x], 
 							options[:answer_position][:y]] 
 
 				#draw the number
@@ -102,6 +107,8 @@ class BarcodePDF
 			angle -= 90
 			@pdf.restore_graphics_state
 		end
+
+		@pdf.restore_graphics_state
 	end
 
 	#Generate the PDF and save to disk
@@ -109,20 +116,36 @@ class BarcodePDF
 		@pdf.render_file file_name
 	end
 	
-	def draw_card_set(pages)
-		count = 0
-		pages.each do |key, value|
-			draw_barcode_assembly(value, {:numbers => [key, key, key, key]})
-			if count < pages.keys.length - 1
-				@pdf.start_new_page
-			end
-			count += 1
+	def draw_card_set(cards, options = {})
+		default_options = {
+			:assembly_geometries => [
+				{:size => 100, :position => [40, 40]},
+				{:size => 100, :position => [400, 500]}
+			],
+			:assembly_options => {:barcode_size => 100, :assembly_position => {}}
+		}
+		options = default_options.merge(options)
+
+		#number of barcode to print on each page
+		assemblies_per_page = options[:assembly_geometries].count
+
+		cards.keys.each_with_index do |number, index|
+			@pdf.start_new_page if index%assemblies_per_page == 0
+			on_page_index = index % assemblies_per_page
+			assembly_geometry = options[:assembly_geometries][on_page_index]
+
+			scale = assembly_geometry[:size].to_f / options[:assembly_options][:barcode_size]
+			options[:assembly_options][:assembly_scale] = scale
+			options[:assembly_options][:assembly_position][:x] = assembly_geometry[:position][0]
+			options[:assembly_options][:assembly_position][:y] = assembly_geometry[:position][1]
+			fills = cards[number]
+			draw_barcode_assembly(fills, options[:assembly_options])
 		end
 	end
 end
 
 ###Test
-barcode = BarcodePDF.new
+barcode = BarcodePDF.new({:page_size => [620, 792]})
 pages = {"0" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	"1" => [0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	"2" => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0]}
