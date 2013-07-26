@@ -12,19 +12,19 @@ class BarcodePDF
 		default_options = {
 			:page_size => [612, 792],
 			# strings to print (one for each side)
-			:annotations => ['www.plickers.com', 'plickers v0.1.4p-3', '', ''],
+			:annotations => ['www.plickers.com', 'version-code', '', ''],
 			:answers => ['A', 'B', 'C', 'D'],
 			:numbers => ['?', '?', '?', '?'],
 			# font options
-			:annotation_font => {:color => '555555', :size => 12, :face => 'Helvetica'},
-			:answer_font => {:color => '333333', :size => 16, :face => 'Times-Roman'},
-			:number_font => {:color => '333333', :size => 32, :face => 'Arial'},
+			:annotation_font => {:color => 'cccccc', :size => 12, :face => 'Helvetica'},
+			:answer_font => {:color => '999999', :size => 16, :face => 'Helvetica'},
+			:number_font => {:color => '999999', :size => 32, :face => 'Helvetica'},
 			# text box positions
 			:annotation_position => {:x => 10, :y => 10},
 			:answer_position => {:x => 0, :y => 10},
 			:number_position => {:x => -10, :y => 10},
 			# barcode parameters
-			:barcode_size => 100,
+			:barcode_size => 50,
 			:barcode_color => '000000',
 			# scaling and positioning parameters
 			:assembly_scale => 2,
@@ -119,8 +119,14 @@ class BarcodePDF
 	def draw_card_set(cards, options = {})
 		default_options = {
 			:assembly_geometries => [
-				{:size => 100, :position => [310, 396]},
-				{:size => 100, :position => [400, 500]}
+				{:size => 45, :position => [310, 396]},
+				{:size => 45, :position => [400, 500]}
+				# {:size => 50, :position => [306, 198]},
+				# {:size => 50, :position => [306, 594]}
+				# {:size => 45, :position => [153, 153]},
+				# {:size => 45, :position => [459, 153]},
+				# {:size => 45, :position => [153, 459]},
+				# {:size => 45, :position => [459, 459]}
 			],
 			:assembly_options => {:barcode_size => 100, :assembly_position => {}}
 		}
@@ -154,4 +160,4 @@ pages = {"0" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 barcode.draw_card_set(pages)
 
 #Save to file
-barcode.save "test.pdf"
+barcode.save "test2.pdf"
