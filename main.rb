@@ -96,14 +96,35 @@ class BarcodePDF
 					:at => [@width/2 - @pdf.width_of(answer)/2 - options[:answer_position][:x], 
 							options[:answer_position][:y]] 
 
+				answer_width = @pdf.width_of(answer)
+
 				#draw the number
 				@pdf.font_size options[:number_font][:size]
 				@pdf.font options[:number_font][:face]
 				@pdf.fill_color options[:number_font][:color]
+				@pdf.default_leading = 0
 				number = options[:numbers][i]
+				width = @pdf.width_of(number)
+				font_size = options[:number_font][:size]
+				
+				while width > @width / 2 - answer_width/2 - 20
+					font_size -= 1
+					width = @pdf.width_of(number, :size => font_size, :single_line => true)
+					p font_size
+				end
+
+				# @pdf.font_size font_size
+				# textbox = Prawn::Text::Box.new(number, :at => [
+				# 	@width - width + options[:number_position][:x], 
+				# 	options[:number_position][:y]], :width => width,
+				# 	:overflow => :shrink_to_fit, :single_line => true,
+				# 	:document => @pdf, :dry_run => true)
+
+				# textbox.render
+
 				@pdf.draw_text number, :at => [
-					@width - @pdf.width_of(number) + options[:number_position][:x], 
-					options[:number_position][:y]]
+					@width - width + options[:number_position][:x], 
+					options[:number_position][:y]], :width => 200, :height => 100, :size => font_size
 			end
 			angle -= 90
 			@pdf.restore_graphics_state
@@ -150,7 +171,7 @@ end
 barcode = BarcodePDF.new({:page_size => [620, 792]})
 pages = {"0" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	"1" => [0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	"2" => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0]}
+	"John Bartholemew Smith" => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0]}
 
 barcode.draw_card_set(pages)
 
