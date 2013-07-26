@@ -12,19 +12,19 @@ class BarcodePDF
 		default_options = {
 			:page_size => [612, 792],
 			# strings to print (one for each side)
-			:annotations => ['www.plickers.com', 'plickers v0.1.4p-3', '', ''],
+			:annotations => ['www.plickers.com', 'version-code', '', ''],
 			:answers => ['A', 'B', 'C', 'D'],
 			:numbers => ['?', '?', '?', '?'],
 			# font options
-			:annotation_font => {:color => '555555', :size => 12, :face => 'Helvetica'},
-			:answer_font => {:color => '333333', :size => 16, :face => 'Times-Roman'},
-			:number_font => {:color => '333333', :size => 32, :face => 'Arial'},
+			:annotation_font => {:color => 'cccccc', :size => 12, :face => 'Helvetica'},
+			:answer_font => {:color => '999999', :size => 16, :face => 'Helvetica'},
+			:number_font => {:color => '999999', :size => 32, :face => 'Trebuchet MS'},
 			# text box positions
 			:annotation_position => {:x => 10, :y => 10},
 			:answer_position => {:x => 0, :y => 10},
 			:number_position => {:x => -10, :y => 10},
 			# barcode parameters
-			:barcode_size => 100,
+			:barcode_size => 50,
 			:barcode_color => '000000',
 			# scaling and positioning parameters
 			:assembly_scale => 2,
@@ -42,8 +42,8 @@ class BarcodePDF
 	  # Courier-Bold Courier-Oblique Courier-BoldOblique
 	  # Times-Bold Times-Italic Times-BoldItalic
 	  # Helvetica-Bold Helvetica-Oblique Helvetica-BoldOblique
-		@pdf.font_families.update("Arial" => { 
-    	:normal => "arial.ttf"})
+		@pdf.font_families.update("Trebuchet MS" => { 
+    	:normal => "Trebuchet MS.ttf"})
 	end
 
 	def draw_barcode_assembly(
@@ -60,8 +60,9 @@ class BarcodePDF
 		@pdf.translate origin[0]/scale.to_f, origin[1]/scale.to_f
 		#Draw the boxes
 		fills.each_with_index do |value, index|
-			x = barcode_size*FILL_CODE[index][0]
-			y = @height - (barcode_size*FILL_CODE[index][1])
+		  #Subtract 2.5 from all FILL_CODEs to center barcode at origin
+			x = barcode_size*(FILL_CODE[index][0] - 2.5)
+			y = @height - (barcode_size*(FILL_CODE[index][1] - 2.5))
 			if value == 1 #Need to be empty, draw white box
 				@pdf.fill_color = "ffffff"
 			else
@@ -76,7 +77,8 @@ class BarcodePDF
 		translate_y = [@height, @height, 0, 0]
 		4.times do |i|
 			@pdf.save_graphics_state
-			@pdf.translate(translate_x[i], translate_y[i])
+			#Adjust by half the width and height to center at origin
+			@pdf.translate(translate_x[i] - @width/2.0, translate_y[i] + @height/2.0)
 			@pdf.rotate(angle, :origin => [0, 0]) do 
 
 				#draw the annotation text
@@ -119,8 +121,12 @@ class BarcodePDF
 	def draw_card_set(cards, options = {})
 		default_options = {
 			:assembly_geometries => [
-				{:size => 100, :position => [40, 40]},
-				{:size => 100, :position => [400, 500]}
+				# {:size => 50, :position => [306, 198]},
+				# {:size => 50, :position => [306, 594]}
+				{:size => 45, :position => [153, 153]},
+				{:size => 45, :position => [459, 153]},
+				{:size => 45, :position => [153, 459]},
+				{:size => 45, :position => [459, 459]}
 			],
 			:assembly_options => {:barcode_size => 100, :assembly_position => {}}
 		}
@@ -134,11 +140,14 @@ class BarcodePDF
 			on_page_index = index % assemblies_per_page
 			assembly_geometry = options[:assembly_geometries][on_page_index]
 
+			# calculate scale to make assembly match specified size
 			scale = assembly_geometry[:size].to_f / options[:assembly_options][:barcode_size]
 			options[:assembly_options][:assembly_scale] = scale
 			options[:assembly_options][:assembly_position][:x] = assembly_geometry[:position][0]
 			options[:assembly_options][:assembly_position][:y] = assembly_geometry[:position][1]
 			fills = cards[number]
+
+			options[:assembly_options][:numbers] = [number, number, number, number]
 			draw_barcode_assembly(fills, options[:assembly_options])
 		end
 	end
@@ -146,11 +155,11 @@ end
 
 ###Test
 barcode = BarcodePDF.new({:page_size => [620, 792]})
-pages = {"0" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+pages = {"John Bartholemew Smith" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	"1" => [0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	"2" => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0]}
 
 barcode.draw_card_set(pages)
 
 #Save to file
-barcode.save "test.pdf"
+barcode.save "test2.pdf"
