@@ -110,17 +110,7 @@ class BarcodePDF
 				while width > @width / 2 - answer_width/2 - 20
 					font_size -= 1
 					width = @pdf.width_of(number, :size => font_size, :single_line => true)
-					p font_size
 				end
-
-				# @pdf.font_size font_size
-				# textbox = Prawn::Text::Box.new(number, :at => [
-				# 	@width - width + options[:number_position][:x], 
-				# 	options[:number_position][:y]], :width => width,
-				# 	:overflow => :shrink_to_fit, :single_line => true,
-				# 	:document => @pdf, :dry_run => true)
-
-				# textbox.render
 
 				@pdf.draw_text number, :at => [
 					@width - width + options[:number_position][:x], 
