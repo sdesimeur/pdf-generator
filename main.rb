@@ -16,16 +16,16 @@ class BarcodePDF
 			:answers => ['A', 'B', 'C', 'D'],
 			:numbers => ['?', '?', '?', '?'],
 			# font options
-			:annotation_font => {:color => '555555', :size => 12, :face => 'Helvetica'},
-			:answer_font => {:color => '333333', :size => 16, :face => 'Times-Roman'},
-			:number_font => {:color => '333333', :size => 32, :face => 'Arial'},
+			:annotation_font => {:color => 'cccccc', :size => 12, :face => 'Helvetica'},
+			:answer_font => {:color => '999999', :size => 16, :face => 'Helvetica'},
+			:number_font => {:color => '999999', :size => 32, :face => 'Helvetica'},
 			# text box positions
-			:annotation_position => {:x => 10, :y => 10},
+			:annotation_position => {:x => 0, :y => 10},
 			:answer_position => {:x => 0, :y => 10},
-			:number_position => {:x => -10, :y => 10},
+			:number_position => {:x => 0, :y => 10},
 			# barcode parameters
 			:barcode_size => 100,
-			:barcode_color => '000000',
+			:barcode_color => '181818',
 			# scaling and positioning parameters
 			:assembly_scale => 2,
 			:assembly_position => {:x => 100, :y => 100}
@@ -107,14 +107,15 @@ class BarcodePDF
 				width = @pdf.width_of(number)
 				font_size = options[:number_font][:size]
 				
-				while width > @width / 2 - answer_width/2 - 20
+				while width > @width/2 - answer_width/2 - 20
 					font_size -= 1
 					width = @pdf.width_of(number, :size => font_size, :single_line => true)
 				end
 
-				@pdf.draw_text number, :at => [
-					@width - width + options[:number_position][:x], 
-					options[:number_position][:y]], :width => 200, :height => 100, :size => font_size
+				@pdf.draw_text number,
+					:at => [@width - width + options[:number_position][:x], 
+					options[:number_position][:y]],
+					:size => font_size
 			end
 			angle -= 90
 			@pdf.restore_graphics_state
@@ -128,11 +129,18 @@ class BarcodePDF
 		@pdf.render_file file_name
 	end
 	
+
+  #TODO draw dashed cutting lines
+
 	def draw_card_set(cards, options = {})
 		default_options = {
 			:assembly_geometries => [
-				 {:size => 50, :position => [310, 396]},
-    		 {:size => 50, :position => [400, 500]}
+				{:size => 50, :position => [198, 198]},
+				{:size => 50, :position => [198, 594]}
+				# {:size => 45, :position => [153, 153]},
+				# {:size => 45, :position => [459, 153]},
+				# {:size => 45, :position => [153, 459]},
+				# {:size => 45, :position => [459, 459]}
 			],
 			:assembly_options => {:barcode_size => 100, :assembly_position => {}}
 		}
@@ -157,11 +165,23 @@ class BarcodePDF
 	end
 end
 
+#TODO: allow pages with the same name - pages should be list of hashes {:name => ..., :number => ..., :bits => ...}
 ###Test
-barcode = BarcodePDF.new({:page_size => [620, 792]})
-pages = {"0" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+barcode = BarcodePDF.new({:page_size => [612, 792]}) #'LETTER' => [612, 792]
+pages = {
+	"John Smith" => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0],
+	"John Bartholomew Smith" => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0],
+	"John Bartholomew Smith Jr." => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0],
+	"John Bartholomew Smith III" => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0],
+	"0" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
 	"1" => [0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-	"John Bartholemew Smith" => [0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0]}
+	"2" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	"3" => [0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	"4" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	"5" => [0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	"6" => [0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+	"7" => [0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+}
 
 barcode.draw_card_set(pages)
 
