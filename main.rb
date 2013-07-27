@@ -15,14 +15,17 @@ class BarcodePDF
 			:annotations => ['www.plickers.com', 'plickers v0.1.4p-3', '', ''],
 			:answers => ['A', 'B', 'C', 'D'],
 			:numbers => ['?', '?', '?', '?'],
+			:names => ['', '', '', ''],
 			# font options
 			:annotation_font => {:color => 'cccccc', :size => 12, :face => 'GothamNarrowMedium'},
-			:answer_font => {:color => 'aaaaaa', :size => 16, :face => 'GothamNarrowMedium'},
-			:number_font => {:color => '999999', :size => 32, :face => 'GothamNarrowMedium'},
+			:answer_font => {:color => '999999', :size => 18, :face => 'GothamNarrowMedium'},
+			:number_font => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'},
+			:name_font => {:color => '999999', :size => 24, :face => 'GothamNarrowBook'},
 			# text box positions
-			:annotation_position => {:x => 0, :y => 10},
+			:annotation_position => {:x => 6, :y => 10},
 			:answer_position => {:x => 0, :y => 10},
-			:number_position => {:x => 0, :y => 10},
+			:number_position => {:x => -6, :y => 10},
+			:name_position => {:x => 6, :y => 10},
 			# barcode parameters
 			:barcode_size => 100,
 			:barcode_color => '222222',
@@ -42,10 +45,12 @@ class BarcodePDF
 	  # Courier-Bold Courier-Oblique Courier-BoldOblique
 	  # Times-Bold Times-Italic Times-BoldItalic
 	  # Helvetica-Bold Helvetica-Oblique Helvetica-BoldOblique
-		@pdf.font_families.update("GothamBook" => {
-			:normal => "gothambook.ttf"})
+		@pdf.font_families.update("GothamNarrowBook" => {
+			:normal => "gothamnarrowbook.ttf"})
 		@pdf.font_families.update("GothamNarrowMedium" => {
 			:normal => "gothamnarrowmedium.ttf"})
+		@pdf.font_families.update("GothamNarrowBold" => {
+			:normal => "gothamnarrowbold.ttf"})
 	end
 
 	def draw_barcode_assembly(
@@ -82,13 +87,6 @@ class BarcodePDF
 			@pdf.translate(translate_x[i] - @width/2.0, translate_y[i] + @height/2.0)
 			@pdf.rotate(angle, :origin => [0, 0]) do
 
-				#draw the annotation text
-				@pdf.font_size options[:annotation_font][:size]
-				@pdf.font options[:annotation_font][:face]
-				@pdf.fill_color options[:annotation_font][:color]
-				@pdf.draw_text options[:annotations][i],
-				:at => [options[:annotation_position][:x], options[:annotation_position][:y]]
-
 				#draw the answer text
 				@pdf.font_size options[:answer_font][:size]
 				@pdf.font options[:answer_font][:face]
@@ -100,24 +98,85 @@ class BarcodePDF
 
 				answer_width = @pdf.width_of(answer)
 
-				#draw the number
-				@pdf.font_size options[:number_font][:size]
-				@pdf.font options[:number_font][:face]
-				@pdf.fill_color options[:number_font][:color]
-				@pdf.default_leading = 0
-				number = options[:numbers][i].to_s
-				width = @pdf.width_of(number)
-				font_size = options[:number_font][:size]
+				if options[:name].empty?
 
-				while width > @width/2 - answer_width/2 - 20
-					font_size -= 1
-					width = @pdf.width_of(number, :size => font_size, :single_line => true)
+					#draw the annotation text
+					@pdf.font_size options[:annotation_font][:size]
+					@pdf.font options[:annotation_font][:face]
+					@pdf.fill_color options[:annotation_font][:color]
+					@pdf.draw_text options[:annotations][i],
+						:at => [options[:annotation_position][:x], options[:annotation_position][:y]]
+
+					#draw the number
+					@pdf.font_size options[:number_font][:size]
+					@pdf.font options[:number_font][:face]
+					@pdf.fill_color options[:number_font][:color]
+					@pdf.default_leading = 0
+					number = options[:numbers][i].to_s
+					width = @pdf.width_of(number)
+					font_size = options[:number_font][:size]
+
+					while width > @width/2 - answer_width/2 - 20
+						font_size -= 1
+						width = @pdf.width_of(number, :size => font_size, :single_line => true)
+					end
+
+					@pdf.draw_text number,
+						:at => [@width - width + options[:number_position][:x],
+						options[:number_position][:y]],
+						:size => font_size
+
+				else
+
+					#draw the name
+					@pdf.font_size options[:name_font][:size]
+					@pdf.font options[:name_font][:face]
+					@pdf.fill_color options[:name_font][:color]
+					@pdf.default_leading = 0
+					name = options[:name]
+					width = @pdf.width_of(name)
+					font_size = options[:name_font][:size]
+
+					while width > @width/2 - answer_width/2 - 40
+						font_size -= 1
+						width = @pdf.width_of(name, :size => font_size, :single_line => true)
+					end
+
+					@pdf.draw_text name,
+						:at => [options[:name_position][:x],
+										options[:name_position][:y]],
+							:size => font_size
+
+					#draw the number
+					@pdf.font_size options[:number_font][:size]
+					@pdf.font options[:number_font][:face]
+					@pdf.fill_color options[:number_font][:color]
+					@pdf.default_leading = 0
+					number = options[:numbers][i].to_s
+					number_width = @pdf.width_of(number)
+					font_size = options[:number_font][:size]
+
+					while number_width > @width/2 - answer_width/2 - 20
+						font_size -= 1
+						number_width = @pdf.width_of(number, :size => font_size, :single_line => true)
+					end
+
+					@pdf.draw_text number,
+						:at => [@width - number_width + options[:number_position][:x],
+						options[:number_position][:y]],
+						:size => font_size
+
+					#draw the annotation text
+					@pdf.font_size options[:annotation_font][:size]
+					@pdf.font options[:annotation_font][:face]
+					@pdf.fill_color options[:annotation_font][:color]
+					annotation = options[:annotations][i]
+					annotation_width = @pdf.width_of(annotation)
+					@pdf.draw_text annotation,
+						:at => [@width*3/4 - annotation_width/2,
+										options[:annotation_position][:y]]
+
 				end
-
-				@pdf.draw_text number,
-					:at => [@width - width + options[:number_position][:x],
-					options[:number_position][:y]],
-					:size => font_size
 			end
 			angle -= 90
 			@pdf.restore_graphics_state
@@ -136,13 +195,13 @@ class BarcodePDF
 	def draw_card_set(cards, options = {})
 		default_options = {
 			:assembly_geometries => [
-				# {:size => 100, :position => [306, 396]}
+				{:size => 100, :position => [306, 396]}
 				# {:size => 50, :position => [198, 198]},
 				# {:size => 50, :position => [198, 594]}
-				{:size => 40, :position => [153, 153]},
-				{:size => 40, :position => [459, 153]},
-				{:size => 40, :position => [153, 459]},
-				{:size => 40, :position => [459, 459]}
+				# {:size => 40, :position => [153, 153]},
+				# {:size => 40, :position => [459, 153]},
+				# {:size => 40, :position => [153, 459]},
+				# {:size => 40, :position => [459, 459]}
 			],
 			:assembly_options => {:barcode_size => 100, :assembly_position => {}}
 		}
@@ -162,7 +221,9 @@ class BarcodePDF
 			options[:assembly_options][:assembly_position][:y] = assembly_geometry[:position][1]
 			fills = card[:bits]
 			number = card[:number]
+			name = card[:name]
 			options[:assembly_options][:numbers] = [number, number, number, number]
+			options[:assembly_options][:name] = name
 			draw_barcode_assembly(fills, options[:assembly_options])
 		end
 	end
@@ -171,44 +232,44 @@ end
 ###Test
 barcode = BarcodePDF.new({:page_size => [612, 792]}) #'LETTER' => [612, 792]
 cards = [
-  {:name => "A", :number => 0, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-  {:name => "B", :number => 1, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-  {:name => "C", :number => 2, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-  {:name => "D", :number => 3, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-  {:name => "E", :number => 4, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-  {:name => "F", :number => 5, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-  {:name => "G", :number => 6, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-  {:name => "H", :number => 7, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
-  {:name => "I", :number => 8, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
-  {:name => "J", :number => 9, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
-  {:name => "K", :number => 10, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
-  {:name => "L", :number => 11, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
-  {:name => "M", :number => 12, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
-  {:name => "N", :number => 13, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
-  {:name => "O", :number => 14, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
-  {:name => "P", :number => 15, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
-  {:name => "Q", :number => 16, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
-  {:name => "R", :number => 17, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
-  {:name => "S", :number => 18, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
-  {:name => "T", :number => 19, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
-  {:name => "U", :number => 20, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
-  {:name => "V", :number => 21, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
-  {:name => "W", :number => 22, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
-  {:name => "X", :number => 23, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
-  {:name => "Y", :number => 24, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
-  {:name => "Z", :number => 25, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
-  {:name => "AA", :number => 26, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
-  {:name => "AB", :number => 27, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
-  {:name => "AC", :number => 28, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
-  {:name => "AD", :number => 29, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
-  {:name => "AE", :number => 30, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
-  {:name => "AF", :number => 31, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
-  {:name => "AG", :number => 32, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
-  {:name => "AH", :number => 33, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
-  {:name => "AI", :number => 34, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
+  {:name => "Albert", :number => 0, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
+  {:name => "Ben", :number => 1, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
+  {:name => "Cameron", :number => 2, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
+  {:name => "Doug", :number => 3, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
+  {:name => "Evelyn", :number => 4, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
+  {:name => "Frank", :number => 5, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
+  {:name => "George", :number => 6, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
+  {:name => "Hector", :number => 7, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
+  {:name => "Idalia", :number => 8, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
+  {:name => "Juan", :number => 9, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
+  {:name => "Katie", :number => 10, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
+  {:name => "Lisa", :number => 11, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
+  {:name => "Madeline", :number => 12, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
+  {:name => "Noah", :number => 13, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
+  {:name => "Oscar", :number => 14, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
+  {:name => "Paul", :number => 15, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0]},
+  {:name => "Quentin", :number => 16, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
+  {:name => "Robert", :number => 17, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
+  {:name => "Susan", :number => 18, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
+  {:name => "Thomas", :number => 19, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
+  {:name => "Ursula", :number => 20, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
+  {:name => "Veronica", :number => 21, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
+  {:name => "Whitney", :number => 22, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
+  {:name => "Xander", :number => 23, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0]},
+  {:name => "Yolanda", :number => 24, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
+  {:name => "Zero", :number => 25, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
+  {:name => "Adam Applegate", :number => 26, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
+  {:name => "Andrew Boston", :number => 27, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
+  {:name => "Alfred Chestertonson", :number => 28, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
+  {:name => "Anne Douglas", :number => 29, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
+  {:name => "Allie Eberhard", :number => 30, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
+  {:name => "Alex Filligree", :number => 31, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0]},
+  {:name => "Abraham Geventereaux", :number => 32, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
+  {:name => "Alexandra Huffington", :number => 33, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
+  {:name => "", :number => 34, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
   {:name => "AJ", :number => 35, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
-  {:name => "AK", :number => 36, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
-  {:name => "AL", :number => 37, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
+  {:name => "", :number => 36, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
+  {:name => "Blankety Blank Blankensonship", :number => 37, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
   {:name => "AM", :number => 38, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
   {:name => "AN", :number => 39, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0]},
   {:name => "AO", :number => 40, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0]},
