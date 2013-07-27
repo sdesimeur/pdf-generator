@@ -16,16 +16,16 @@ class BarcodePDF
 			:answers => ['A', 'B', 'C', 'D'],
 			:numbers => ['?', '?', '?', '?'],
 			# font options
-			:annotation_font => {:color => 'cccccc', :size => 12, :face => 'Helvetica'},
-			:answer_font => {:color => '999999', :size => 16, :face => 'Helvetica'},
-			:number_font => {:color => '999999', :size => 32, :face => 'Helvetica'},
+			:annotation_font => {:color => 'cccccc', :size => 12, :face => 'GothamNarrowMedium'},
+			:answer_font => {:color => 'aaaaaa', :size => 16, :face => 'GothamNarrowMedium'},
+			:number_font => {:color => '999999', :size => 32, :face => 'GothamNarrowMedium'},
 			# text box positions
 			:annotation_position => {:x => 0, :y => 10},
 			:answer_position => {:x => 0, :y => 10},
 			:number_position => {:x => 0, :y => 10},
 			# barcode parameters
 			:barcode_size => 100,
-			:barcode_color => '181818',
+			:barcode_color => '222222',
 			# scaling and positioning parameters
 			:assembly_scale => 2,
 			:assembly_position => {:x => 100, :y => 100}
@@ -42,8 +42,10 @@ class BarcodePDF
 	  # Courier-Bold Courier-Oblique Courier-BoldOblique
 	  # Times-Bold Times-Italic Times-BoldItalic
 	  # Helvetica-Bold Helvetica-Oblique Helvetica-BoldOblique
-		@pdf.font_families.update("Arial" => {
-			:normal => "arial.ttf"})
+		@pdf.font_families.update("GothamBook" => {
+			:normal => "gothambook.ttf"})
+		@pdf.font_families.update("GothamNarrowMedium" => {
+			:normal => "gothamnarrowmedium.ttf"})
 	end
 
 	def draw_barcode_assembly(
