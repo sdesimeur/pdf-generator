@@ -31,7 +31,9 @@ class BarcodePDF
 			:barcode_color => '222222',
 			# scaling and positioning parameters
 			:assembly_scale => 2,
-			:assembly_position => {:x => 100, :y => 100}
+			:assembly_position => {:x => 100, :y => 100},
+			# rotation
+			:assembly_rotation => 0
 		}
 		@options = default_options.merge(options)
 		@margin = [0, 0]
@@ -65,121 +67,124 @@ class BarcodePDF
 			options[:page_size][1] - options[:assembly_position][:y] - @height*scale]
 		@pdf.scale scale
 		@pdf.translate (origin[0])/scale.to_f, (origin[1])/scale.to_f
-		#Draw the boxes
-		fills.each_with_index do |value, index|
-			x = barcode_size*(FILL_CODE[index][0] - 2.5)
-			y = @height - (barcode_size*(FILL_CODE[index][1] - 2.5))
+		@pdf.rotate(options[:assembly_rotation], :origin => [0, barcode_size*5]) do
+			#Draw the boxes
+			fills.each_with_index do |value, index|
+				x = barcode_size*(FILL_CODE[index][0] - 2.5)
+				y = @height - (barcode_size*(FILL_CODE[index][1] - 2.5))
 
-			if value == 1 #Need to be empty, draw white box
-				@pdf.fill_color = "ffffff"
-			else
-				@pdf.fill_color options[:barcode_color]
-			end
-			@pdf.fill_rectangle([x, y], barcode_size, barcode_size)
-		end
-
-		#Draw 4 sides
-		angle = 0
-		translate_x = [0, @width, @width, 0]
-		translate_y = [@height, @height, 0, 0]
-		4.times do |i|
-			@pdf.save_graphics_state
-			@pdf.translate(translate_x[i] - @width/2.0, translate_y[i] + @height/2.0)
-			@pdf.rotate(angle, :origin => [0, 0]) do
-
-				#draw the answer text
-				@pdf.font_size options[:answer_font][:size]
-				@pdf.font options[:answer_font][:face]
-				@pdf.fill_color options[:answer_font][:color]
-				answer = options[:answers][i]
-				@pdf.draw_text answer,
-					:at => [@width/2 - @pdf.width_of(answer)/2 - options[:answer_position][:x],
-							options[:answer_position][:y]]
-
-				answer_width = @pdf.width_of(answer)
-
-				if options[:name].empty?
-
-					#draw the annotation text
-					@pdf.font_size options[:annotation_font][:size]
-					@pdf.font options[:annotation_font][:face]
-					@pdf.fill_color options[:annotation_font][:color]
-					@pdf.draw_text options[:annotations][i],
-						:at => [options[:annotation_position][:x], options[:annotation_position][:y]]
-
-					#draw the number
-					@pdf.font_size options[:number_font][:size]
-					@pdf.font options[:number_font][:face]
-					@pdf.fill_color options[:number_font][:color]
-					@pdf.default_leading = 0
-					number = options[:numbers][i].to_s
-					width = @pdf.width_of(number)
-					font_size = options[:number_font][:size]
-
-					while width > @width/2 - answer_width/2 - 20
-						font_size -= 1
-						width = @pdf.width_of(number, :size => font_size, :single_line => true)
-					end
-
-					@pdf.draw_text number,
-						:at => [@width - width + options[:number_position][:x],
-						options[:number_position][:y]],
-						:size => font_size
-
+				if value == 1 #Need to be empty, draw white box
+					@pdf.fill_color = "ffffff"
 				else
+					@pdf.fill_color options[:barcode_color]
+				end
+				@pdf.fill_rectangle([x, y], barcode_size, barcode_size)
+			end
 
-					#draw the name
-					@pdf.font_size options[:name_font][:size]
-					@pdf.font options[:name_font][:face]
-					@pdf.fill_color options[:name_font][:color]
-					@pdf.default_leading = 0
-					name = options[:name]
-					width = @pdf.width_of(name)
-					font_size = options[:name_font][:size]
+			#Draw 4 sides
+			angle = 0
+			translate_x = [0, @width, @width, 0]
+			translate_y = [@height, @height, 0, 0]
+			4.times do |i|
+				@pdf.save_graphics_state
+				@pdf.translate(translate_x[i] - @width/2.0, translate_y[i] + @height/2.0)
+				@pdf.rotate(angle, :origin => [0, 0]) do
 
-					while width > @width/2 - answer_width/2 - 40
-						font_size -= 1
-						width = @pdf.width_of(name, :size => font_size, :single_line => true)
-					end
+					#draw the answer text
+					@pdf.font_size options[:answer_font][:size]
+					@pdf.font options[:answer_font][:face]
+					@pdf.fill_color options[:answer_font][:color]
+					answer = options[:answers][i]
+					@pdf.draw_text answer,
+						:at => [@width/2 - @pdf.width_of(answer)/2 - options[:answer_position][:x],
+								options[:answer_position][:y]]
 
-					@pdf.draw_text name,
-						:at => [options[:name_position][:x],
-										options[:name_position][:y]],
+					answer_width = @pdf.width_of(answer)
+
+					if options[:name].empty?
+
+						#draw the annotation text
+						@pdf.font_size options[:annotation_font][:size]
+						@pdf.font options[:annotation_font][:face]
+						@pdf.fill_color options[:annotation_font][:color]
+						@pdf.draw_text options[:annotations][i],
+							:at => [options[:annotation_position][:x], options[:annotation_position][:y]]
+
+						#draw the number
+						@pdf.font_size options[:number_font][:size]
+						@pdf.font options[:number_font][:face]
+						@pdf.fill_color options[:number_font][:color]
+						@pdf.default_leading = 0
+						number = options[:numbers][i].to_s
+						width = @pdf.width_of(number)
+						font_size = options[:number_font][:size]
+
+						while width > @width/2 - answer_width/2 - 20
+							font_size -= 1
+							width = @pdf.width_of(number, :size => font_size, :single_line => true)
+						end
+
+						@pdf.draw_text number,
+							:at => [@width - width + options[:number_position][:x],
+							options[:number_position][:y]],
 							:size => font_size
 
-					#draw the number
-					@pdf.font_size options[:number_font][:size]
-					@pdf.font options[:number_font][:face]
-					@pdf.fill_color options[:number_font][:color]
-					@pdf.default_leading = 0
-					number = options[:numbers][i].to_s
-					number_width = @pdf.width_of(number)
-					font_size = options[:number_font][:size]
+					else
 
-					while number_width > @width/2 - answer_width/2 - 20
-						font_size -= 1
-						number_width = @pdf.width_of(number, :size => font_size, :single_line => true)
+						#draw the name
+						@pdf.font_size options[:name_font][:size]
+						@pdf.font options[:name_font][:face]
+						@pdf.fill_color options[:name_font][:color]
+						@pdf.default_leading = 0
+						name = options[:name]
+						width = @pdf.width_of(name)
+						font_size = options[:name_font][:size]
+
+						while width > @width/2 - answer_width/2 - 40
+							font_size -= 1
+							width = @pdf.width_of(name, :size => font_size, :single_line => true)
+						end
+
+						@pdf.draw_text name,
+							:at => [options[:name_position][:x],
+											options[:name_position][:y]],
+								:size => font_size
+
+						#draw the number
+						@pdf.font_size options[:number_font][:size]
+						@pdf.font options[:number_font][:face]
+						@pdf.fill_color options[:number_font][:color]
+						@pdf.default_leading = 0
+						number = options[:numbers][i].to_s
+						number_width = @pdf.width_of(number)
+						font_size = options[:number_font][:size]
+
+						while number_width > @width/2 - answer_width/2 - 20
+							font_size -= 1
+							number_width = @pdf.width_of(number, :size => font_size, :single_line => true)
+						end
+
+						@pdf.draw_text number,
+							:at => [@width - number_width + options[:number_position][:x],
+							options[:number_position][:y]],
+							:size => font_size
+
+						#draw the annotation text
+						@pdf.font_size options[:annotation_font][:size]
+						@pdf.font options[:annotation_font][:face]
+						@pdf.fill_color options[:annotation_font][:color]
+						annotation = options[:annotations][i]
+						annotation_width = @pdf.width_of(annotation)
+						@pdf.draw_text annotation,
+							:at => [@width*3/4 - annotation_width/2,
+											options[:annotation_position][:y]]
+
 					end
-
-					@pdf.draw_text number,
-						:at => [@width - number_width + options[:number_position][:x],
-						options[:number_position][:y]],
-						:size => font_size
-
-					#draw the annotation text
-					@pdf.font_size options[:annotation_font][:size]
-					@pdf.font options[:annotation_font][:face]
-					@pdf.fill_color options[:annotation_font][:color]
-					annotation = options[:annotations][i]
-					annotation_width = @pdf.width_of(annotation)
-					@pdf.draw_text annotation,
-						:at => [@width*3/4 - annotation_width/2,
-										options[:annotation_position][:y]]
-
 				end
+				angle -= 90
+				@pdf.restore_graphics_state
 			end
-			angle -= 90
-			@pdf.restore_graphics_state
+
 		end
 
 		@pdf.restore_graphics_state
@@ -219,7 +224,11 @@ class BarcodePDF
 				# {:size => 40, :position => [153, 459]},
 				# {:size => 40, :position => [459, 459]}
 			],
-			:assembly_options => {:barcode_size => 100, :assembly_position => {}}
+			:assembly_options => {
+				:barcode_size => 100,
+				:assembly_position => {}
+			},
+			:randomize_rotation => true
 		}
 		options = default_options.merge(options)
 
@@ -235,6 +244,13 @@ class BarcodePDF
 			options[:assembly_options][:assembly_scale] = scale
 			options[:assembly_options][:assembly_position][:x] = assembly_geometry[:position][0]
 			options[:assembly_options][:assembly_position][:y] = assembly_geometry[:position][1]
+
+			if(options[:randomize_rotation])
+				options[:assembly_options][:assembly_rotation] = Random.rand(4)*90
+			else
+				options[:assembly_options][:assembly_rotation] = 0
+			end
+
 			fills = card[:bits]
 			number = card[:number]
 			name = card[:name]
