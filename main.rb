@@ -195,9 +195,25 @@ class BarcodePDF
 	def draw_card_set(cards, options = {})
 		default_options = {
 			:assembly_geometries => [
-				{:size => 100, :position => [306, 396]}
+				# Centered:
+				# 1/page
+				# {:size => 100, :position => [306, 396]}
+				# 2/page
+				# {:size => 50, :position => [306, 198]},
+				# {:size => 50, :position => [306, 594]}
+				# 4/page
+				{:size => 40, :position => [153, 198]},
+				{:size => 40, :position => [459, 198]},
+				{:size => 40, :position => [153, 594]},
+				{:size => 40, :position => [459, 594]}
+
+				# Off-center (to minimize cutting):
+				# 1/page
+				# {:size => 100, :position => [306, 306]}
+				# 2/page
 				# {:size => 50, :position => [198, 198]},
 				# {:size => 50, :position => [198, 594]}
+				# 4/page
 				# {:size => 40, :position => [153, 153]},
 				# {:size => 40, :position => [459, 153]},
 				# {:size => 40, :position => [153, 459]},
