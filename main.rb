@@ -1,6 +1,6 @@
 require 'prawn'
 class BarcodePDF
-	BARCODE_SIZE = 5
+	MODULES_PER_SIDE = 5
 	FILL_CODE = [
 		[2, 2], [2, 3], [1, 3], [1, 2], [1, 1],
 		[2, 1], [3, 1], [3, 2], [3, 3], [3, 4],
@@ -27,8 +27,9 @@ class BarcodePDF
 			:number_position => {:x => -6, :y => 10},
 			:name_position => {:x => 6, :y => 10},
 			# barcode parameters
-			:barcode_size => 100,
-			:barcode_color => '222222',
+			:module_size => 100,
+			:zero_module_color => '222222',
+			:one_module_color => 'ffffff',
 			# scaling and positioning parameters
 			:assembly_scale => 2,
 			:assembly_position => {:x => 100, :y => 100},
@@ -59,35 +60,35 @@ class BarcodePDF
 		fills, options = {} #barcode fill-array
 	)
 		options = @options.merge(options)
-		barcode_size = options[:barcode_size]
-		@width = @height = barcode_size * BARCODE_SIZE
+		module_size = options[:module_size]
+		barcode_width = barcode_height = module_size * MODULES_PER_SIDE
 		scale = options[:assembly_scale]
 		@pdf.save_graphics_state
 		origin = [options[:assembly_position][:x],
-			options[:page_size][1] - options[:assembly_position][:y] - @height*scale]
+			options[:page_size][1] - options[:assembly_position][:y] - barcode_height*scale]
 		@pdf.scale scale
 		@pdf.translate (origin[0])/scale.to_f, (origin[1])/scale.to_f
-		@pdf.rotate(options[:assembly_rotation], :origin => [0, barcode_size*5]) do
+		@pdf.rotate(options[:assembly_rotation], :origin => [0, barcode_width]) do
 			#Draw the boxes
 			fills.each_with_index do |value, index|
-				x = barcode_size*(FILL_CODE[index][0] - 2.5)
-				y = @height - (barcode_size*(FILL_CODE[index][1] - 2.5))
+				x = module_size*(FILL_CODE[index][0] - 2.5)
+				y = barcode_height - (module_size*(FILL_CODE[index][1] - 2.5))
 
 				if value == 1 #Need to be empty, draw white box
-					@pdf.fill_color = "ffffff"
+					@pdf.fill_color = options[:one_module_color]
 				else
-					@pdf.fill_color options[:barcode_color]
+					@pdf.fill_color options[:zero_module_color]
 				end
-				@pdf.fill_rectangle([x, y], barcode_size, barcode_size)
+				@pdf.fill_rectangle([x, y], module_size, module_size)
 			end
 
 			#Draw 4 sides
 			angle = 0
-			translate_x = [0, @width, @width, 0]
-			translate_y = [@height, @height, 0, 0]
+			translate_x = [0, barcode_width, barcode_width, 0]
+			translate_y = [barcode_height, barcode_height, 0, 0]
 			4.times do |i|
 				@pdf.save_graphics_state
-				@pdf.translate(translate_x[i] - @width/2.0, translate_y[i] + @height/2.0)
+				@pdf.translate(translate_x[i] - barcode_width/2.0, translate_y[i] + barcode_height/2.0)
 				@pdf.rotate(angle, :origin => [0, 0]) do
 
 					#draw the answer text
@@ -96,7 +97,7 @@ class BarcodePDF
 					@pdf.fill_color options[:answer_font][:color]
 					answer = options[:answers][i]
 					@pdf.draw_text answer,
-						:at => [@width/2 - @pdf.width_of(answer)/2 - options[:answer_position][:x],
+						:at => [barcode_width/2 - @pdf.width_of(answer)/2 - options[:answer_position][:x],
 								options[:answer_position][:y]]
 
 					answer_width = @pdf.width_of(answer)
@@ -119,13 +120,13 @@ class BarcodePDF
 						width = @pdf.width_of(number)
 						font_size = options[:number_font][:size]
 
-						while width > @width/2 - answer_width/2 - 20
+						while width > barcode_width/2 - answer_width/2 - 20
 							font_size -= 1
 							width = @pdf.width_of(number, :size => font_size, :single_line => true)
 						end
 
 						@pdf.draw_text number,
-							:at => [@width - width + options[:number_position][:x],
+							:at => [barcode_width - width + options[:number_position][:x],
 							options[:number_position][:y]],
 							:size => font_size
 
@@ -140,7 +141,7 @@ class BarcodePDF
 						width = @pdf.width_of(name)
 						font_size = options[:name_font][:size]
 
-						while width > @width/2 - answer_width/2 - 40
+						while width > barcode_width/2 - answer_width/2 - 40 # TODO: 40 here should be a parameter
 							font_size -= 1
 							width = @pdf.width_of(name, :size => font_size, :single_line => true)
 						end
@@ -159,13 +160,13 @@ class BarcodePDF
 						number_width = @pdf.width_of(number)
 						font_size = options[:number_font][:size]
 
-						while number_width > @width/2 - answer_width/2 - 20
+						while number_width > barcode_width/2 - answer_width/2 - 20 # TODO: 20 here should be a parameter
 							font_size -= 1
 							number_width = @pdf.width_of(number, :size => font_size, :single_line => true)
 						end
 
 						@pdf.draw_text number,
-							:at => [@width - number_width + options[:number_position][:x],
+							:at => [barcode_width - number_width + options[:number_position][:x],
 							options[:number_position][:y]],
 							:size => font_size
 
@@ -176,7 +177,7 @@ class BarcodePDF
 						annotation = options[:annotations][i]
 						annotation_width = @pdf.width_of(annotation)
 						@pdf.draw_text annotation,
-							:at => [@width*3/4 - annotation_width/2,
+							:at => [barcode_width*3/4 - annotation_width/2,
 											options[:annotation_position][:y]]
 
 					end
@@ -225,7 +226,7 @@ class BarcodePDF
 				# {:size => 40, :position => [459, 459]}
 			],
 			:assembly_options => {
-				:barcode_size => 100,
+				:module_size => 100,
 				:assembly_position => {}
 			},
 			:randomize_rotation => true
@@ -240,7 +241,7 @@ class BarcodePDF
 			on_page_index = index % assemblies_per_page
 			assembly_geometry = options[:assembly_geometries][on_page_index]
 
-			scale = assembly_geometry[:size].to_f / options[:assembly_options][:barcode_size]
+			scale = assembly_geometry[:size].to_f / options[:assembly_options][:module_size]
 			options[:assembly_options][:assembly_scale] = scale
 			options[:assembly_options][:assembly_position][:x] = assembly_geometry[:position][0]
 			options[:assembly_options][:assembly_position][:y] = assembly_geometry[:position][1]
