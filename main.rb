@@ -231,7 +231,14 @@ class BarcodePDF
 				]
 			},
 			# 2/page
-			:two_offcenter => {
+			:two_offcenter_right => {
+				:assembly_geometries => [
+					{:size => 50, :position => [414, 198]},
+					{:size => 50, :position => [414, 594]}
+				]
+			},
+			# 2/page
+			:two_offcenter_left => {
 				:assembly_geometries => [
 					{:size => 50, :position => [198, 198]},
 					{:size => 50, :position => [198, 594]}
@@ -248,7 +255,7 @@ class BarcodePDF
 			}
 		}
 		default_options = {
-			:layout_configuration => :two_offcenter,
+			:layout_configuration => :two_offcenter_right,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
