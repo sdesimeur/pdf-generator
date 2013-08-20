@@ -248,7 +248,7 @@ class BarcodePDF
 			}
 		}
 		default_options = {
-			:layout_configuration => :four_centered,
+			:layout_configuration => :two_centered,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
@@ -257,7 +257,8 @@ class BarcodePDF
 				:module_size => 100,
 				:assembly_position => {}
 			},
-			:randomize_rotation => true
+			:randomize_rotation => true,
+			:print_names => false
 		}
 		options = default_options.merge(options)
 
@@ -285,9 +286,10 @@ class BarcodePDF
 				options[:assembly_options][:assembly_rotation] = 0
 			end
 
+			name = ''
 			fills = card[:bits]
 			number = card[:number]
-			name = card[:name]
+			name = card[:name] if options[:print_names]
 			options[:assembly_options][:numbers] = [number, number, number, number]
 			options[:assembly_options][:name] = name
 			draw_barcode_assembly(fills, options[:assembly_options])
@@ -364,7 +366,7 @@ cards = [
   {:name => "BL", :number => 63, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0]}
 ]
 
-barcode.draw_card_set(cards)
+barcode.draw_card_set(cards[1..40])
 
 #Save to file
 barcode.save "test.pdf"
