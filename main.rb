@@ -30,7 +30,7 @@ class BarcodePDF
 			:module_size => 100,
 			:zero_module_color => '222222',
 			:one_module_color => 'ffffff',
-			# scaling and positioning parameters
+			# scaling and positioning parameters (usually replaced by assembly_geometry parameters)
 			:assembly_scale => 2,
 			:assembly_position => {:x => 100, :y => 100},
 			# rotation
@@ -205,14 +205,22 @@ class BarcodePDF
 			:one_centered => {
 				:assembly_geometries => [
 					{:size => 100, :position => [306, 396]}
-				]
+				],
+				:assembly_options => {
+					:module_size => 100,
+					:answer_font => {}
+				}
 			},
 			# 2/page
 			:two_centered => {
 				:assembly_geometries => [
 					{:size => 50, :position => [306, 198]},
 					{:size => 50, :position => [306, 594]}
-				]
+				],
+				:assembly_options => {
+					:module_size => 100,
+					:answer_font => {:size => 20}
+				}
 			},
 			# 4/page
 			:four_centered => {
@@ -221,21 +229,33 @@ class BarcodePDF
 					{:size => 40, :position => [459, 198]},
 					{:size => 40, :position => [153, 594]},
 					{:size => 40, :position => [459, 594]}
-				]
+				],
+				:assembly_options => {
+					:module_size => 100,
+					:answer_font => {:size => 24}
+				}
 			},
 			# Off-center (to minimize cutting):
 			# 1/page
 			:one_offcenter => {
 				:assembly_geometries => [
 					{:size => 100, :position => [306, 306]}
-				]
+				],
+				:assembly_options => {
+					:module_size => 100,
+					:answer_font => {}
+				}
 			},
 			# 2/page
 			:two_offcenter => {
 				:assembly_geometries => [
 					{:size => 50, :position => [198, 198]},
 					{:size => 50, :position => [198, 594]}
-				]
+				],
+				:assembly_options => {
+					:module_size => 100,
+					:answer_font => {:size => 20}
+				}
 			},
 			# 4/page
 			:four_offcenter => {
@@ -244,19 +264,19 @@ class BarcodePDF
 					{:size => 40, :position => [459, 153]},
 					{:size => 40, :position => [153, 459]},
 					{:size => 40, :position => [459, 459]}
-				]
+				],
+				:assembly_options => {
+					:module_size => 100,
+					:answer_font => {:size => 24}
+				}
 			}
 		}
 		default_options = {
-			:layout_configuration => :four_centered,
+			:layout_configuration => :two_offcenter,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
 			],
-			:assembly_options => {
-				:module_size => 100,
-				:assembly_position => {}
-			},
 			:randomize_rotation => true
 		}
 		options = default_options.merge(options)
@@ -276,8 +296,10 @@ class BarcodePDF
 
 			scale = assembly_geometry[:size].to_f / options[:assembly_options][:module_size]
 			options[:assembly_options][:assembly_scale] = scale
-			options[:assembly_options][:assembly_position][:x] = assembly_geometry[:position][0]
-			options[:assembly_options][:assembly_position][:y] = assembly_geometry[:position][1]
+			options[:assembly_options][:assembly_position] = {
+				:x => assembly_geometry[:position][0],
+				:y => assembly_geometry[:position][1]
+			}
 
 			if(options[:randomize_rotation])
 				options[:assembly_options][:assembly_rotation] = Random.rand(4)*90
