@@ -12,13 +12,13 @@ class BarcodePDF
 		default_options = {
 			:page_size => [612, 792],
 			# strings to print (one for each side)
-			:annotations => ['www.plickers.com', 'plickers v0.1.4p-3', '', ''],
+			:annotations => ['www.plickers.com', 'version 1', '', ''],
 			:answers => ['A', 'B', 'C', 'D'],
 			:numbers => ['?', '?', '?', '?'],
 			:names => ['', '', '', ''],
 			# font options
-			:annotation_font => {:color => 'cccccc', :size => 12, :face => 'GothamNarrowMedium'},
-			:answer_font => {:color => '999999', :size => 18, :face => 'GothamNarrowMedium'},
+			:annotation_font => {:color => 'cccccc', :size => 14, :face => 'GothamNarrowMedium'},
+			:answer_font => {:color => '999999', :size => 19, :face => 'GothamNarrowMedium'},
 			:number_font => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'},
 			:name_font => {:color => '999999', :size => 24, :face => 'GothamNarrowBook'},
 			# text box positions
@@ -28,7 +28,7 @@ class BarcodePDF
 			:name_position => {:x => 6, :y => 10},
 			# barcode parameters
 			:module_size => 100,
-			:zero_module_color => '222222',
+			:zero_module_color => '111111',
 			:one_module_color => 'ffffff',
 			# scaling and positioning parameters
 			:assembly_scale => 2,
@@ -248,7 +248,7 @@ class BarcodePDF
 			}
 		}
 		default_options = {
-			:layout_configuration => :two_centered,
+			:layout_configuration => :two_offcenter,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
