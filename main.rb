@@ -255,7 +255,7 @@ class BarcodePDF
 			}
 		}
 		default_options = {
-			:layout_configuration => :two_offcenter_right,
+			:layout_configuration => :two_centered,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
@@ -274,10 +274,24 @@ class BarcodePDF
 			options = options.merge(layout_configurations[options[:layout_configuration]])
 		end
 
+		cards_collated = []
+		if(true) #collate option
+			(1..cards.count).each do |number|
+				if(number%2 == 1)
+					cards_collated << cards[number/2]
+				else
+					cards_collated << cards[number/2 + 19]
+				end
+			end
+		else
+			cards_collated = cards
+		end
+
 		#number of barcode to print on each page
 		assemblies_per_page = options[:assembly_geometries].count
 
-		cards.each_with_index do |card, index|
+		cards_collated.each_with_index do |card, index|
+			puts card, index
 			@pdf.start_new_page if index%assemblies_per_page == 0
 			on_page_index = index % assemblies_per_page
 			assembly_geometry = options[:assembly_geometries][on_page_index]

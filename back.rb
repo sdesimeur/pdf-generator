@@ -37,13 +37,13 @@ class BackPDF
 			x = -0.5*image_width
 			y = 1.5*image_height
 			
-			@pdf.image 'back-color.png', :at => [x, y], :scale => image_width/600.0
+			@pdf.image 'back-grayscale.png', :at => [x, y], :scale => image_width/1208.0
 	
-			@pdf.font_size options[:url_font][:size]
-			@pdf.font options[:url_font][:face]
-			@pdf.fill_color options[:url_font][:color]
-			@pdf.draw_text "www.plickers.com",
-				:at => [-0.5*@pdf.width_of("www.plickers.com"), 0.5*image_height - 1.5]
+			# @pdf.font_size options[:url_font][:size]
+			# @pdf.font options[:url_font][:face]
+			# @pdf.fill_color options[:url_font][:color]
+			# @pdf.draw_text "www.plickers.com",
+			# 	:at => [-0.5*@pdf.width_of("www.plickers.com"), 0.5*image_height - 1.5]
 
 			#@pdf.fill_color '000000'
 			#@pdf.fill_rectangle([x, y], module_size, module_size)
@@ -115,7 +115,7 @@ class BackPDF
 			}
 		}
 		default_options = {
-			:layout_configuration => :two_offcenter_right,
+			:layout_configuration => :two_centered,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
