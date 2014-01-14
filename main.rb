@@ -18,7 +18,7 @@ class BarcodePDF
 			:names => ['', '', '', ''],
 			# font options
 			:annotation_font => {:color => 'cccccc', :size => 14, :face => 'GothamNarrowMedium'},
-			:answer_font => {:color => '999999', :size => 19, :face => 'GothamNarrowMedium'},
+			:answer_font => {:color => '999999', :size => 16, :face => 'GothamNarrowMedium'},
 			:number_font => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'},
 			:name_font => {:color => '999999', :size => 24, :face => 'GothamNarrowBook'},
 			# text box positions
@@ -204,7 +204,7 @@ class BarcodePDF
 			# 1/page
 			:one_centered => {
 				:assembly_geometries => [
-					{:size => 100, :position => [306, 396]}
+					{:size => 90, :position => [306, 396]}
 				]
 			},
 			# 2/page
@@ -255,7 +255,7 @@ class BarcodePDF
 			}
 		}
 		default_options = {
-			:layout_configuration => :two_centered,
+			:layout_configuration => :one_centered,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
@@ -275,7 +275,7 @@ class BarcodePDF
 		end
 
 		cards_collated = []
-		if(true) #collate option
+		if(false) #collate option
 			(1..cards.count).each do |number|
 				if(number%2 == 1)
 					cards_collated << cards[number/2]
