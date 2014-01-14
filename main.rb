@@ -275,7 +275,7 @@ class BarcodePDF
 		end
 
 		cards_collated = []
-		if(true) #collate option
+		if(false) #collate option
 			(1..cards.count).each do |number|
 				if(number%2 == 1)
 					cards_collated << cards[number/2]
@@ -387,7 +387,7 @@ cards = [
   {:name => "BL", :number => 63, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0]}
 ]
 
-barcode.draw_card_set(cards[1..40])
+barcode.draw_card_set(cards[1..63])
 
 #Save to file
 barcode.save "test.pdf"
