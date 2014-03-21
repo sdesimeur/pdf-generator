@@ -5,5 +5,5 @@ Generate Plickers Card PDFs
 
     $ gem install prawn
     $ irb
-    > ./ main.rb
+    > require './main.rb'
     > quit
