@@ -12,19 +12,19 @@ class BarcodePDF
 		default_options = {
 			:page_size => [612, 792],
 			# strings to print (one for each side)
-			:annotations => ['www.plickers.com', 'version 1', '', ''],
+			:annotations => ['', '', '', ''],
 			:answers => ['A', 'B', 'C', 'D'],
 			:numbers => ['?', '?', '?', '?'],
 			:names => ['', '', '', ''],
 			# font options
-			:annotation_font => {:color => 'cccccc', :size => 14, :face => 'GothamNarrowMedium'},
-			:answer_font => {:color => '999999', :size => 19, :face => 'GothamNarrowMedium'},
-			:number_font => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'},
+			:annotation_font => {:color => 'cccccc', :size => 28, :face => 'GothamNarrowMedium'},
+			:answer_font => {:color => '999999', :size => 56, :face => 'GothamNarrowBook'},
+			:number_font => {:color => '999999', :size => 56, :face => 'GothamNarrowBook'},
 			:name_font => {:color => '999999', :size => 24, :face => 'GothamNarrowBook'},
 			# text box positions
-			:annotation_position => {:x => 6, :y => 10},
-			:answer_position => {:x => 0, :y => 10},
-			:number_position => {:x => -6, :y => 10},
+			:annotation_position => {:x => 6, :y => 20},
+			:answer_position => {:x => 0, :y => 20},
+			:number_position => {:x => -6, :y => 20},
 			:name_position => {:x => 6, :y => 10},
 			# barcode parameters
 			:module_size => 100,
@@ -342,7 +342,7 @@ class BarcodePDF
 			}
 		}
 		default_options = {
-			:layout_configuration => :two_centered,
+			:layout_configuration => :forty_centeredish,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
@@ -362,7 +362,7 @@ class BarcodePDF
 		end
 
 		cards_collated = []
-		if(true) #collate option
+		if(false) #collate option
 			(1..cards.count).each do |number|
 				if(number%2 == 1)
 					cards_collated << cards[number/2]
