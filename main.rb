@@ -223,6 +223,93 @@ class BarcodePDF
 					{:size => 40, :position => [459, 594]}
 				]
 			},
+			# 12/page
+			:twelve_centered => {
+				:assembly_geometries => [
+					{:size => 25, :position => [102, 99]},
+					{:size => 25, :position => [306, 99]},
+					{:size => 25, :position => [510, 99]},
+					{:size => 25, :position => [102, 297]},
+					{:size => 25, :position => [306, 297]},
+					{:size => 25, :position => [510, 297]},
+					{:size => 25, :position => [102, 495]},
+					{:size => 25, :position => [306, 495]},
+					{:size => 25, :position => [510, 495]},
+					{:size => 25, :position => [102, 693]},
+					{:size => 25, :position => [306, 693]},
+					{:size => 25, :position => [510, 693]}
+				]
+			},
+			# 20/page
+			:twenty_centeredish => {
+				:assembly_geometries => [
+					{:size => 20, :position => [81, 81]},
+					{:size => 20, :position => [231, 81]},
+					{:size => 20, :position => [381, 81]},
+					{:size => 20, :position => [531, 81]},
+					{:size => 20, :position => [81, 231]},
+					{:size => 20, :position => [231, 231]},
+					{:size => 20, :position => [381, 231]},
+					{:size => 20, :position => [531, 231]},
+					{:size => 20, :position => [81, 381]},
+					{:size => 20, :position => [231, 381]},
+					{:size => 20, :position => [381, 381]},
+					{:size => 20, :position => [531, 381]},
+					{:size => 20, :position => [81, 531]},
+					{:size => 20, :position => [231, 531]},
+					{:size => 20, :position => [381, 531]},
+					{:size => 20, :position => [531, 531]},
+					{:size => 20, :position => [81, 681]},
+					{:size => 20, :position => [231, 681]},
+					{:size => 20, :position => [381, 681]},
+					{:size => 20, :position => [531, 681]}
+				]
+			},
+			# 40/page
+			:forty_centeredish => {
+				:assembly_geometries => [
+					{:size => 11, :position => [40, 40]},
+					{:size => 11, :position => [116, 40]},
+					{:size => 11, :position => [192, 40]},
+					{:size => 11, :position => [268, 40]},
+					{:size => 11, :position => [344, 40]},
+					{:size => 11, :position => [420, 40]},
+					{:size => 11, :position => [496, 40]},
+					{:size => 11, :position => [572, 40]},
+					{:size => 11, :position => [40, 116]},
+					{:size => 11, :position => [116, 116]},
+					{:size => 11, :position => [192, 116]},
+					{:size => 11, :position => [268, 116]},
+					{:size => 11, :position => [344, 116]},
+					{:size => 11, :position => [420, 116]},
+					{:size => 11, :position => [496, 116]},
+					{:size => 11, :position => [572, 116]},
+					{:size => 11, :position => [40, 192]},
+					{:size => 11, :position => [116, 192]},
+					{:size => 11, :position => [192, 192]},
+					{:size => 11, :position => [268, 192]},
+					{:size => 11, :position => [344, 192]},
+					{:size => 11, :position => [420, 192]},
+					{:size => 11, :position => [496, 192]},
+					{:size => 11, :position => [572, 192]},
+					{:size => 11, :position => [40, 268]},
+					{:size => 11, :position => [116, 268]},
+					{:size => 11, :position => [192, 268]},
+					{:size => 11, :position => [268, 268]},
+					{:size => 11, :position => [344, 268]},
+					{:size => 11, :position => [420, 268]},
+					{:size => 11, :position => [496, 268]},
+					{:size => 11, :position => [572, 268]},
+					{:size => 11, :position => [40, 344]},
+					{:size => 11, :position => [116, 344]},
+					{:size => 11, :position => [192, 344]},
+					{:size => 11, :position => [268, 344]},
+					{:size => 11, :position => [344, 344]},
+					{:size => 11, :position => [420, 344]},
+					{:size => 11, :position => [496, 344]},
+					{:size => 11, :position => [572, 344]}
+				]
+			},
 			# Off-center (to minimize cutting):
 			# 1/page
 			:one_offcenter => {
