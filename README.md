@@ -1,9 +1,13 @@
 pdf-generator
 =============
 
-Generate Plickers Card PDFs
+Generate Plickers Business Card PDFs
 
-    $ gem install prawn
+- Uses prawn's `template` option, which was extracted after prawn version 0.12.
+
+```
+    $ gem install prawn --version '= 0.12.0'
     $ irb
     > require './main.rb'
     > quit
+```

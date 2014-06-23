@@ -10,7 +10,12 @@ class BarcodePDF
 	]
 	def initialize(options={})
 		default_options = {
-			:page_size => [612, 792],
+			# drawing toggles
+			:draw_answers => false,
+			:draw_numbers => false,
+			:draw_annotations => false,
+			:draw_names => false,
+			:draw_card_number_text => true,
 			# strings to print (one for each side)
 			:annotations => ['', '', '', ''],
 			:answers => ['A', 'B', 'C', 'D'],
@@ -20,6 +25,7 @@ class BarcodePDF
 			:annotation_font => {:color => 'cccccc', :size => 28, :face => 'GothamNarrowMedium'},
 			:answer_font => {:color => '999999', :size => 56, :face => 'GothamNarrowBook'},
 			:number_font => {:color => '999999', :size => 56, :face => 'GothamNarrowBook'},
+			:card_number_text_font => {:color => '127b87', :size => 6, :face => 'LatoLight'},
 			:name_font => {:color => '999999', :size => 24, :face => 'GothamNarrowBook'},
 			# text box positions
 			:annotation_position => {:x => 6, :y => 20},
@@ -54,21 +60,40 @@ class BarcodePDF
 			:normal => "gothamnarrowmedium.ttf"})
 		@pdf.font_families.update("GothamNarrowBold" => {
 			:normal => "gothamnarrowbold.ttf"})
+		@pdf.font_families.update("LatoLight" => {
+			:normal => "Lato-Lig.ttf"})
+		@pdf.font_families.update("LatoRegular" => {
+			:normal => "Lato-Reg.ttf"})
 	end
 
 	def draw_barcode_assembly(
 		fills, options = {} #barcode fill-array
 	)
 		options = @options.merge(options)
+		page_size = [@pdf.page.size[0], @pdf.page.size[1]]
+
+		#draw the card number text
+		@pdf.font_size options[:card_number_text_font][:size]
+		@pdf.font options[:card_number_text_font][:face]
+		@pdf.fill_color options[:card_number_text_font][:color]
+		number = 'Card # ' + options[:numbers][0].to_s
+		number_width = @pdf.width_of(number)
+		number_height = @pdf.height_of(number)
+		if options[:draw_card_number_text]
+			@pdf.draw_text number,
+				:at => [2.7269*72 - number_width/2, page_size[1] - 1.9676*72 - number_height/4]
+		end
+
 		module_size = options[:module_size]
 		barcode_width = barcode_height = module_size * MODULES_PER_SIDE
 		scale = options[:assembly_scale]
 		@pdf.save_graphics_state
 		origin = [options[:assembly_position][:x],
-			options[:page_size][1] - options[:assembly_position][:y] - barcode_height*scale]
+			page_size[1] - options[:assembly_position][:y] - barcode_height*scale]
 		@pdf.scale scale
 		@pdf.translate (origin[0])/scale.to_f, (origin[1])/scale.to_f
 		@pdf.rotate(options[:assembly_rotation], :origin => [0, barcode_width]) do
+
 			#Draw the boxes
 			fills.each_with_index do |value, index|
 				x = module_size*(FILL_CODE[index][0] - 2.5)
@@ -96,9 +121,12 @@ class BarcodePDF
 					@pdf.font options[:answer_font][:face]
 					@pdf.fill_color options[:answer_font][:color]
 					answer = options[:answers][i]
-					@pdf.draw_text answer,
-						:at => [barcode_width/2 - @pdf.width_of(answer)/2 - options[:answer_position][:x],
-								options[:answer_position][:y]]
+
+					if options[:draw_answers]
+						@pdf.draw_text answer,
+							:at => [barcode_width/2 - @pdf.width_of(answer)/2 - options[:answer_position][:x],
+									options[:answer_position][:y]]
+					end
 
 					answer_width = @pdf.width_of(answer)
 
@@ -108,8 +136,10 @@ class BarcodePDF
 						@pdf.font_size options[:annotation_font][:size]
 						@pdf.font options[:annotation_font][:face]
 						@pdf.fill_color options[:annotation_font][:color]
-						@pdf.draw_text options[:annotations][i],
-							:at => [options[:annotation_position][:x], options[:annotation_position][:y]]
+						if options[:draw_annotations]
+							@pdf.draw_text options[:annotations][i],
+								:at => [options[:annotation_position][:x], options[:annotation_position][:y]]
+						end
 
 						#draw the number
 						@pdf.font_size options[:number_font][:size]
@@ -125,10 +155,12 @@ class BarcodePDF
 							width = @pdf.width_of(number, :size => font_size, :single_line => true)
 						end
 
-						@pdf.draw_text number,
-							:at => [barcode_width - width + options[:number_position][:x],
-							options[:number_position][:y]],
-							:size => font_size
+						if options[:draw_numbers]
+							@pdf.draw_text number,
+								:at => [barcode_width - width + options[:number_position][:x],
+								options[:number_position][:y]],
+								:size => font_size
+						end
 
 					else
 
@@ -146,10 +178,12 @@ class BarcodePDF
 							width = @pdf.width_of(name, :size => font_size, :single_line => true)
 						end
 
-						@pdf.draw_text name,
-							:at => [options[:name_position][:x],
-											options[:name_position][:y]],
-								:size => font_size
+						if options[:draw_names]
+							@pdf.draw_text name,
+								:at => [options[:name_position][:x],
+												options[:name_position][:y]],
+									:size => font_size
+						end
 
 						#draw the number
 						@pdf.font_size options[:number_font][:size]
@@ -165,10 +199,12 @@ class BarcodePDF
 							number_width = @pdf.width_of(number, :size => font_size, :single_line => true)
 						end
 
-						@pdf.draw_text number,
-							:at => [barcode_width - number_width + options[:number_position][:x],
-							options[:number_position][:y]],
-							:size => font_size
+						if options[:draw_numbers]
+							@pdf.draw_text number,
+								:at => [barcode_width - number_width + options[:number_position][:x],
+								options[:number_position][:y]],
+								:size => font_size
+						end
 
 						#draw the annotation text
 						@pdf.font_size options[:annotation_font][:size]
@@ -176,9 +212,11 @@ class BarcodePDF
 						@pdf.fill_color options[:annotation_font][:color]
 						annotation = options[:annotations][i]
 						annotation_width = @pdf.width_of(annotation)
-						@pdf.draw_text annotation,
-							:at => [barcode_width*3/4 - annotation_width/2,
-											options[:annotation_position][:y]]
+						if options[:draw_annotations]
+							@pdf.draw_text annotation,
+								:at => [barcode_width*3/4 - annotation_width/2,
+												options[:annotation_position][:y]]
+						end
 
 					end
 				end
@@ -339,10 +377,16 @@ class BarcodePDF
 					{:size => 40, :position => [153, 459]},
 					{:size => 40, :position => [459, 459]}
 				]
+			},
+			# Business Card
+			:bcard_one_offcenter => {
+				:assembly_geometries => [
+					{:size => 1.125*72/5, :position => [2.7269*72, 1.125*72]} # convert from inches
+				]
 			}
 		}
 		default_options = {
-			:layout_configuration => :forty_centeredish,
+			:layout_configuration => :bcard_one_offcenter,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
@@ -351,7 +395,7 @@ class BarcodePDF
 				:module_size => 100,
 				:assembly_position => {}
 			},
-			:randomize_rotation => true,
+			:randomize_rotation => false,
 			:print_names => false
 		}
 		options = default_options.merge(options)
@@ -379,7 +423,7 @@ class BarcodePDF
 
 		cards_collated.each_with_index do |card, index|
 			puts card, index
-			@pdf.start_new_page if index%assemblies_per_page == 0
+			@pdf.start_new_page({:template => 'PlickersBusinessCards.Nolan.pdf'}) if index%assemblies_per_page == 0
 			on_page_index = index % assemblies_per_page
 			assembly_geometry = options[:assembly_geometries][on_page_index]
 
@@ -406,7 +450,7 @@ class BarcodePDF
 end
 
 ###Test
-barcode = BarcodePDF.new({:page_size => [612, 792]}) #'LETTER' => [612, 792]
+barcode = BarcodePDF.new()
 cards = [
   {:name => "Albert", :number => 0, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
   {:name => "Ben", :number => 1, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
