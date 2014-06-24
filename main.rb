@@ -11,7 +11,7 @@ class BarcodePDF
 	def initialize(options={})
 		default_options = {
 			# drawing toggles
-			:draw_answers => false,
+			:draw_answers => true,
 			:draw_numbers => false,
 			:draw_annotations => false,
 			:draw_names => false,
@@ -23,9 +23,9 @@ class BarcodePDF
 			:names => ['', '', '', ''],
 			# font options
 			:annotation_font => {:color => 'cccccc', :size => 28, :face => 'GothamNarrowMedium'},
-			:answer_font => {:color => '999999', :size => 56, :face => 'GothamNarrowBook'},
+			:answer_font => {:color => 'c7e4d8', :size => 56, :face => 'LatoBold'},
 			:number_font => {:color => '999999', :size => 56, :face => 'GothamNarrowBook'},
-			:card_number_text_font => {:color => '127b87', :size => 6, :face => 'LatoLight'},
+			:card_number_text_font => {:color => 'c7e4d8', :size => 9, :face => 'LatoBold'},
 			:name_font => {:color => '999999', :size => 24, :face => 'GothamNarrowBook'},
 			# text box positions
 			:annotation_position => {:x => 6, :y => 20},
@@ -44,6 +44,9 @@ class BarcodePDF
 		}
 		@options = default_options.merge(options)
 		@margin = [0, 0]
+	end
+
+	def init_document
 		@pdf = Prawn::Document.new(:page_size => @options[:page_size],
 			:margin => [0, 0],
 			:skip_page_creation => true)
@@ -64,6 +67,13 @@ class BarcodePDF
 			:normal => "Lato-Lig.ttf"})
 		@pdf.font_families.update("LatoRegular" => {
 			:normal => "Lato-Reg.ttf"})
+		@pdf.font_families.update("LatoBold" => {
+			:normal => "Lato-Bol.ttf"})
+	end
+
+	#Generate the PDF and save to disk
+	def save_document(file_name)
+		@pdf.render_file file_name
 	end
 
 	def draw_barcode_assembly(
@@ -81,12 +91,15 @@ class BarcodePDF
 		number_height = @pdf.height_of(number)
 		if options[:draw_card_number_text]
 			@pdf.draw_text number,
-				:at => [2.7269*72 - number_width/2, page_size[1] - 1.9676*72 - number_height/4]
+				:at => [2.5*72 - number_width/2, 0.23*72]
 		end
 
 		module_size = options[:module_size]
 		barcode_width = barcode_height = module_size * MODULES_PER_SIDE
 		scale = options[:assembly_scale]
+		if(options[:assembly_position][:y] == "center_vertically")
+			options[:assembly_position][:y] = page_size[1]/2
+		end
 		@pdf.save_graphics_state
 		origin = [options[:assembly_position][:x],
 			page_size[1] - options[:assembly_position][:y] - barcode_height*scale]
@@ -227,11 +240,6 @@ class BarcodePDF
 		end
 
 		@pdf.restore_graphics_state
-	end
-
-	#Generate the PDF and save to disk
-	def save(file_name)
-		@pdf.render_file file_name
 	end
 
   #TODO draw dashed cutting lines
@@ -381,7 +389,7 @@ class BarcodePDF
 			# Business Card
 			:bcard_one_offcenter => {
 				:assembly_geometries => [
-					{:size => 1.125*72/5, :position => [2.7269*72, 1.125*72]} # convert from inches
+					{:size => 1.125*72/5, :position => [2.5*72, 'center_vertically']} # convert from inches
 				]
 			}
 		}
@@ -396,7 +404,10 @@ class BarcodePDF
 				:assembly_position => {}
 			},
 			:randomize_rotation => false,
-			:print_names => false
+			:print_names => false,
+			:one_page_per_document => true,
+			:output_dir => 'output',
+			:new_page_options => {:template => 'PlickersBusinessCards.Frontside.FINAL.Nolan.redacted.pdf'}
 		}
 		options = default_options.merge(options)
 
@@ -418,12 +429,26 @@ class BarcodePDF
 			cards_collated = cards
 		end
 
+		if options[:one_page_per_document]
+			Dir.mkdir options[:output_dir] unless Dir.exist? options[:output_dir]
+		else
+			init_document
+		end
+
 		#number of barcode to print on each page
 		assemblies_per_page = options[:assembly_geometries].count
 
+		page_number = 0
+
 		cards_collated.each_with_index do |card, index|
 			puts card, index
-			@pdf.start_new_page({:template => 'PlickersBusinessCards.Nolan.pdf'}) if index%assemblies_per_page == 0
+			if (index%assemblies_per_page == 0)
+				if options[:one_page_per_document]
+					init_document
+				end
+				@pdf.start_new_page(options[:new_page_options])
+				page_number += 1
+			end
 			on_page_index = index % assemblies_per_page
 			assembly_geometry = options[:assembly_geometries][on_page_index]
 
@@ -445,12 +470,17 @@ class BarcodePDF
 			options[:assembly_options][:numbers] = [number, number, number, number]
 			options[:assembly_options][:name] = name
 			draw_barcode_assembly(fills, options[:assembly_options])
+			if ((index + 1)%assemblies_per_page == 0 && options[:one_page_per_document])
+				save_document options[:output_dir] + "/" + page_number.to_s + ".pdf"
+			end
+		end
+
+		if !options[:one_page_per_document]
+			save_document "output.pdf"
 		end
 	end
 end
 
-###Test
-barcode = BarcodePDF.new()
 cards = [
   {:name => "Albert", :number => 0, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
   {:name => "Ben", :number => 1, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]},
@@ -518,7 +548,7 @@ cards = [
   {:name => "BL", :number => 63, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0]}
 ]
 
-barcode.draw_card_set(cards[1..40])
+###Test
+barcode = BarcodePDF.new()
 
-#Save to file
-barcode.save "test.pdf"
+barcode.draw_card_set(cards[1..50])
