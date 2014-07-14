@@ -17,14 +17,14 @@ class BarcodePDF
 			:numbers => ['?', '?', '?', '?'],
 			:names => ['', '', '', ''],
 			# font options
-			:annotation_font => {:color => 'cccccc', :size => 14, :face => 'GothamNarrowMedium'},
-			:answer_font => {:color => '999999', :size => 19, :face => 'GothamNarrowMedium'},
-			:number_font => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'},
+			:annotation_font => {:color => 'b0b0b0', :size => 20, :face => 'GothamNarrowMedium'},
+			:answer_font => {:color => '808080', :size => 40, :face => 'GothamNarrowBook'},
+			:number_font => {:color => '808080', :size => 32, :face => 'GothamNarrowBook'},
 			:name_font => {:color => '999999', :size => 24, :face => 'GothamNarrowBook'},
 			# text box positions
-			:annotation_position => {:x => 6, :y => 10},
-			:answer_position => {:x => 0, :y => 10},
-			:number_position => {:x => -6, :y => 10},
+			:annotation_position => {:x => 6, :y => 14},
+			:answer_position => {:x => 0, :y => 14},
+			:number_position => {:x => -6, :y => 14},
 			:name_position => {:x => 6, :y => 10},
 			# barcode parameters
 			:module_size => 100,
@@ -339,10 +339,43 @@ class BarcodePDF
 					{:size => 40, :position => [153, 459]},
 					{:size => 40, :position => [459, 459]}
 				]
+			},
+			# 6/page
+			:six_offcenter => {
+				:assembly_geometries => [
+					{:size => 30, :position => [132, 132]},
+					{:size => 30, :position => [396, 132]},
+					{:size => 30, :position => [132, 396]},
+					{:size => 30, :position => [396, 396]},
+					{:size => 30, :position => [132, 660]},
+					{:size => 30, :position => [396, 660]}
+				]
+			},
+			# 6/page
+			:six_centered_18pt_bleed => {
+				:assembly_geometries => [
+					{:size => 30, :position => [180, 144]},
+					{:size => 30, :position => [432, 144]},
+					{:size => 30, :position => [180, 396]},
+					{:size => 30, :position => [432, 396]},
+					{:size => 30, :position => [180, 648]},
+					{:size => 30, :position => [432, 648]}
+				]
+			},
+			# 6/page
+			:six_offcenter_18pt_bleed => {
+				:assembly_geometries => [
+					{:size => 30, :position => [144, 144]},
+					{:size => 30, :position => [396, 144]},
+					{:size => 30, :position => [144, 396]},
+					{:size => 30, :position => [396, 396]},
+					{:size => 30, :position => [144, 648]},
+					{:size => 30, :position => [396, 648]}
+				]
 			}
 		}
 		default_options = {
-			:layout_configuration => :two_centered,
+			:layout_configuration => :six_centered_18pt_bleed,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
@@ -352,7 +385,8 @@ class BarcodePDF
 				:assembly_position => {}
 			},
 			:randomize_rotation => true,
-			:print_names => false
+			:print_names => false,
+			:collate => true
 		}
 		options = default_options.merge(options)
 
@@ -361,21 +395,19 @@ class BarcodePDF
 			options = options.merge(layout_configurations[options[:layout_configuration]])
 		end
 
+		#number of barcode to print on each page
+		assemblies_per_page = options[:assembly_geometries].count
+		page_count = (cards.count + assemblies_per_page - 1)/assemblies_per_page
+
 		cards_collated = []
-		if(true) #collate option
+		if(options[:collate]) #collate option
 			(1..cards.count).each do |number|
-				if(number%2 == 1)
-					cards_collated << cards[number/2]
-				else
-					cards_collated << cards[number/2 + 19]
-				end
+				# broken if each page doesn't have the same number of cards
+				cards_collated << cards[((number - 1)%assemblies_per_page)*page_count + (number - 1)/assemblies_per_page] # assemblies_per_page + ( - 1)]
 			end
 		else
 			cards_collated = cards
 		end
-
-		#number of barcode to print on each page
-		assemblies_per_page = options[:assembly_geometries].count
 
 		cards_collated.each_with_index do |card, index|
 			puts card, index
@@ -474,7 +506,7 @@ cards = [
   {:name => "BL", :number => 63, :bits => [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0]}
 ]
 
-barcode.draw_card_set(cards[1..40])
+barcode.draw_card_set(cards[1..60])
 
 #Save to file
 barcode.save "test.pdf"
