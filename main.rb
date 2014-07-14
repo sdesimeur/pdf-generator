@@ -10,27 +10,28 @@ class BarcodePDF
 	]
 	def initialize(options={})
 		default_options = {
+			:page_size => [396, 396],
 			# drawing toggles
 			:draw_answers => true,
-			:draw_numbers => false,
-			:draw_annotations => false,
+			:draw_numbers => true,
+			:draw_annotations => true,
 			:draw_names => false,
-			:draw_card_number_text => true,
+			:draw_card_number_text => false,
 			# strings to print (one for each side)
-			:annotations => ['', '', '', ''],
+			:annotations => ['www.plickers.com', 'version 1', '', ''],
 			:answers => ['A', 'B', 'C', 'D'],
 			:numbers => ['?', '?', '?', '?'],
 			:names => ['', '', '', ''],
 			# font options
-			:annotation_font => {:color => 'cccccc', :size => 28, :face => 'GothamNarrowMedium'},
-			:answer_font => {:color => 'c7e4d8', :size => 56, :face => 'LatoBold'},
-			:number_font => {:color => '999999', :size => 56, :face => 'GothamNarrowBook'},
+			:annotation_font => {:color => 'cccccc', :size => 14, :face => 'GothamNarrowMedium'},
+			:answer_font => {:color => '999999', :size => 19, :face => 'GothamNarrowMedium'},
+			:number_font => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'},
 			:card_number_text_font => {:color => 'c7e4d8', :size => 9, :face => 'LatoBold'},
 			:name_font => {:color => '999999', :size => 24, :face => 'GothamNarrowBook'},
 			# text box positions
-			:annotation_position => {:x => 6, :y => 20},
-			:answer_position => {:x => 0, :y => 20},
-			:number_position => {:x => -6, :y => 20},
+			:annotation_position => {:x => 6, :y => 10},
+			:answer_position => {:x => 0, :y => 10},
+			:number_position => {:x => -6, :y => 10},
 			:name_position => {:x => 6, :y => 10},
 			# barcode parameters
 			:module_size => 100,
@@ -97,6 +98,9 @@ class BarcodePDF
 		module_size = options[:module_size]
 		barcode_width = barcode_height = module_size * MODULES_PER_SIDE
 		scale = options[:assembly_scale]
+		if(options[:assembly_position][:x] == "center_horizontally")
+			options[:assembly_position][:x] = page_size[0]/2
+		end
 		if(options[:assembly_position][:y] == "center_vertically")
 			options[:assembly_position][:y] = page_size[1]/2
 		end
@@ -250,7 +254,7 @@ class BarcodePDF
 			# 1/page
 			:one_centered => {
 				:assembly_geometries => [
-					{:size => 100, :position => [306, 396]}
+					{:size => 50, :position => ['center_horizontally', 'center_vertically']}
 				]
 			},
 			# 2/page
@@ -394,7 +398,7 @@ class BarcodePDF
 			}
 		}
 		default_options = {
-			:layout_configuration => :bcard_one_offcenter,
+			:layout_configuration => :one_centered,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
@@ -403,11 +407,11 @@ class BarcodePDF
 				:module_size => 100,
 				:assembly_position => {}
 			},
-			:randomize_rotation => false,
+			:randomize_rotation => true,
 			:print_names => false,
-			:one_page_per_document => true,
-			:output_dir => 'output',
-			:new_page_options => {:template => 'PlickersBusinessCards.Frontside.FINAL.Nolan.redacted.pdf'}
+			:one_page_per_document => false,
+			:output_dir => '',
+			:new_page_options => {}
 		}
 		options = default_options.merge(options)
 
