@@ -555,4 +555,4 @@ cards = [
 ###Test
 barcode = BarcodePDF.new()
 
-barcode.draw_card_set(cards[1..50])
+barcode.draw_card_set(cards[1..40])
