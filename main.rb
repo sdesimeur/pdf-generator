@@ -10,7 +10,11 @@ class BarcodePDF
 	]
 	def initialize(options={})
 		default_options = {
-			:page_size => [396, 396],
+			:page_size => {
+				:square_half_letter => [396, 396],
+				:letter => [612, 792]
+			},
+			:page_size_toggle => :letter,
 			# drawing toggles
 			:draw_answers => true,
 			:draw_numbers => true,
@@ -52,7 +56,7 @@ class BarcodePDF
 	end
 
 	def init_document
-		@pdf = Prawn::Document.new(:page_size => @options[:page_size],
+		@pdf = Prawn::Document.new(:page_size => @options[:page_size][@options[:page_size_toggle]],
 			:margin => [0, 0],
 			:skip_page_creation => true)
 
@@ -389,7 +393,7 @@ class BarcodePDF
 			}
 		}
 		default_options = {
-			:layout_configuration => :one_centered,
+			:layout_configuration => :two_centered,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
