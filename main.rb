@@ -407,7 +407,7 @@ class BarcodePDF
 				:module_size => 100,
 				:assembly_position => {}
 			},
-			:randomize_rotation => true,
+			:randomize_rotation => [5, 10, 1, 2],
 			:print_names => false,
 			:one_page_per_document => false,
 			:output_dir => '',
@@ -461,8 +461,10 @@ class BarcodePDF
 			options[:assembly_options][:assembly_position][:x] = assembly_geometry[:position][0]
 			options[:assembly_options][:assembly_position][:y] = assembly_geometry[:position][1]
 
-			if(options[:randomize_rotation])
+			if(options[:randomize_rotation] === true)
 				options[:assembly_options][:assembly_rotation] = Random.rand(4)*90
+			elsif(options[:randomize_rotation])
+				options[:assembly_options][:assembly_rotation] = get_weighted_random_rotation(options[:randomize_rotation])
 			else
 				options[:assembly_options][:assembly_rotation] = 0
 			end
@@ -481,6 +483,20 @@ class BarcodePDF
 
 		if !options[:one_page_per_document]
 			save_document "output.pdf"
+		end
+	end
+
+	def get_weighted_random_rotation(weights)
+		total_weight = weights.reduce(:+)
+		rand = Random.rand(total_weight)
+		cumulative_weight = 0
+		rotation = 0
+		weights.each do |weight|
+			cumulative_weight += weight
+			if(cumulative_weight > rand)
+				return rotation
+			end
+			rotation += 90
 		end
 	end
 end
