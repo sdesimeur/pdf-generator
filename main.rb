@@ -24,7 +24,11 @@ class BarcodePDF
 			:names => ['', '', '', ''],
 			# font options
 			:annotation_font => {:color => 'cccccc', :size => 14, :face => 'GothamNarrowMedium'},
-			:answer_font => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'},
+			:answer_font => {
+				:normal => {:color => '999999', :size => 19, :face => 'GothamNarrowMedium'},
+				:large => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'}
+			},
+			:answer_font_toggle => :large,
 			:number_font => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'},
 			:card_number_text_font => {:color => 'c7e4d8', :size => 9, :face => 'LatoBold'},
 			:name_font => {:color => '999999', :size => 24, :face => 'GothamNarrowBook'},
@@ -148,7 +152,7 @@ class BarcodePDF
 				@pdf.rotate(angle, :origin => [0, 0]) do
 
 					#draw the answer text
-					set_font options[:answer_font]
+					set_font options[:answer_font][options[:answer_font_toggle]]
 					answer = options[:answers][i]
 
 					if options[:draw_answers]
