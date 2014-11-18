@@ -77,6 +77,21 @@ class BarcodePDF
 		@pdf.render_file file_name
 	end
 
+	def set_font(font_options)
+		@pdf.font_size font_options[:size]
+		@pdf.font font_options[:face]
+		@pdf.fill_color font_options[:color]
+	end
+
+	def fit_font(text, font_size, target_width)
+		width = @pdf.width_of(text, :size => font_size, :single_line => true)
+		while width > target_width
+			font_size -= 1
+			width = @pdf.width_of(text, :size => font_size, :single_line => true)
+		end
+		return width
+	end
+
 	def draw_barcode_assembly(
 		fills, options = {} #barcode fill-array
 	)
@@ -84,9 +99,8 @@ class BarcodePDF
 		page_size = [@pdf.page.size[0], @pdf.page.size[1]]
 
 		#draw the card number text
-		@pdf.font_size options[:card_number_text_font][:size]
-		@pdf.font options[:card_number_text_font][:face]
-		@pdf.fill_color options[:card_number_text_font][:color]
+		font = options[:card_number_text_font]
+		set_font font
 		number = 'Card # ' + options[:numbers][0].to_s
 		number_width = @pdf.width_of(number)
 		number_height = @pdf.height_of(number)
@@ -134,9 +148,7 @@ class BarcodePDF
 				@pdf.rotate(angle, :origin => [0, 0]) do
 
 					#draw the answer text
-					@pdf.font_size options[:answer_font][:size]
-					@pdf.font options[:answer_font][:face]
-					@pdf.fill_color options[:answer_font][:color]
+					set_font options[:answer_font]
 					answer = options[:answers][i]
 
 					if options[:draw_answers]
@@ -150,83 +162,58 @@ class BarcodePDF
 					if options[:name].empty?
 
 						#draw the annotation text
-						@pdf.font_size options[:annotation_font][:size]
-						@pdf.font options[:annotation_font][:face]
-						@pdf.fill_color options[:annotation_font][:color]
+						set_font options[:annotation_font]
 						if options[:draw_annotations]
 							@pdf.draw_text options[:annotations][i],
 								:at => [options[:annotation_position][:x], options[:annotation_position][:y]]
 						end
 
 						#draw the number
-						@pdf.font_size options[:number_font][:size]
-						@pdf.font options[:number_font][:face]
-						@pdf.fill_color options[:number_font][:color]
+						font = options[:number_font]
+						set_font font
 						@pdf.default_leading = 0
 						number = options[:numbers][i].to_s
-						width = @pdf.width_of(number)
-						font_size = options[:number_font][:size]
-
-						while width > barcode_width/2 - answer_width/2 - 20
-							font_size -= 1
-							width = @pdf.width_of(number, :size => font_size, :single_line => true)
-						end
+						width = fit_font(number, font[:size], barcode_width/2 - answer_width/2 - 20)
 
 						if options[:draw_numbers]
 							@pdf.draw_text number,
 								:at => [barcode_width - width + options[:number_position][:x],
 								options[:number_position][:y]],
-								:size => font_size
+								:size => font[:size]
 						end
 
 					else
 
 						#draw the name
-						@pdf.font_size options[:name_font][:size]
-						@pdf.font options[:name_font][:face]
-						@pdf.fill_color options[:name_font][:color]
+						font = options[:name_font]
+						set_font font
 						@pdf.default_leading = 0
 						name = options[:name]
-						width = @pdf.width_of(name)
-						font_size = options[:name_font][:size]
-
-						while width > barcode_width/2 - answer_width/2 - 40 # TODO: 40 here should be a parameter
-							font_size -= 1
-							width = @pdf.width_of(name, :size => font_size, :single_line => true)
-						end
+						width = fit_font(name, font[:size], barcode_width/2 - answer_width/2 - 40) # TODO: 40 here should be a parameter
 
 						if options[:draw_names]
 							@pdf.draw_text name,
 								:at => [options[:name_position][:x],
 												options[:name_position][:y]],
-									:size => font_size
+									:size => font[:size]
 						end
 
 						#draw the number
-						@pdf.font_size options[:number_font][:size]
-						@pdf.font options[:number_font][:face]
-						@pdf.fill_color options[:number_font][:color]
+						font = options[:number_font]
+						set_font font
 						@pdf.default_leading = 0
 						number = options[:numbers][i].to_s
-						number_width = @pdf.width_of(number)
-						font_size = options[:number_font][:size]
-
-						while number_width > barcode_width/2 - answer_width/2 - 20 # TODO: 20 here should be a parameter
-							font_size -= 1
-							number_width = @pdf.width_of(number, :size => font_size, :single_line => true)
-						end
+						number_width = fit_font(number, font[:size], barcode_width/2 - answer_width/2 - 20) # TODO: 20 here should be a parameter
 
 						if options[:draw_numbers]
 							@pdf.draw_text number,
 								:at => [barcode_width - number_width + options[:number_position][:x],
 								options[:number_position][:y]],
-								:size => font_size
+								:size => font[:size]
 						end
 
 						#draw the annotation text
-						@pdf.font_size options[:annotation_font][:size]
-						@pdf.font options[:annotation_font][:face]
-						@pdf.fill_color options[:annotation_font][:color]
+						set_font options[:annotation_font]
 						annotation = options[:annotations][i]
 						annotation_width = @pdf.width_of(annotation)
 						if options[:draw_annotations]
