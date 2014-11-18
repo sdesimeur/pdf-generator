@@ -407,7 +407,7 @@ class BarcodePDF
 				:module_size => 100,
 				:assembly_position => {}
 			},
-			:randomize_rotation => [5, 10, 1, 2],
+			:randomize_rotation => true, #[5, 10, 1, 2]
 			:print_names => false,
 			:one_page_per_document => false,
 			:output_dir => '',
