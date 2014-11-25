@@ -22,8 +22,15 @@ class BarcodePDF
 			:draw_names => false,
 			:draw_card_number_text => false,
 			# strings to print (one for each side)
-			:annotations => ['www.plickers.com', 'version 1', '', ''],
-			:answers => ['A', 'B', 'C', 'D'],
+			:annotations => {
+				:english => ['www.plickers.com', 'version 1', '', ''],
+				:arabic => ['www.plickers.com', 'version 1', '', ''] #TODO 1 رادصإلا
+			},
+			:answers => {
+				:english => ['A', 'B', 'C', 'D'],
+				:arabic => ['أ', 'ب', 'ت', 'ث']
+			},
+			:language_toggle => :arabic,
 			:numbers => ['?', '?', '?', '?'],
 			:names => ['', '', '', ''],
 			# font options
@@ -32,7 +39,7 @@ class BarcodePDF
 				:normal => {:color => '999999', :size => 19, :face => 'GothamNarrowMedium'},
 				:large => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'}
 			},
-			:answer_font_toggle => :large,
+			:answer_font_toggle => :normal,
 			:number_font => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'},
 			:card_number_text_font => {:color => 'c7e4d8', :size => 9, :face => 'LatoBold'},
 			:name_font => {:color => '999999', :size => 24, :face => 'GothamNarrowBook'},
@@ -53,6 +60,12 @@ class BarcodePDF
 		}
 		@options = default_options.merge(options)
 		@margin = [0, 0]
+
+		if(@options[:language_toggle] == :arabic)
+			@options[:answer_font][:normal][:face] = 'DroidNaskh-Bold'
+			@options[:answer_font][:large][:face] = 'DroidNaskh-Regular'
+			@options[:answer_position][:y] = 15
+		end
 	end
 
 	def init_document
@@ -78,6 +91,10 @@ class BarcodePDF
 			:normal => "Lato-Reg.ttf"})
 		@pdf.font_families.update("LatoBold" => {
 			:normal => "Lato-Bol.ttf"})
+		@pdf.font_families.update("DroidNaskh-Regular" => {
+			:normal => "DroidNaskh-Regular.ttf"})
+		@pdf.font_families.update("DroidNaskh-Bold" => {
+			:normal => "DroidNaskh-Bold.ttf"})
 	end
 
 	#Generate the PDF and save to disk
@@ -157,7 +174,7 @@ class BarcodePDF
 
 					#draw the answer text
 					set_font options[:answer_font][options[:answer_font_toggle]]
-					answer = options[:answers][i]
+					answer = options[:answers][options[:language_toggle]][i]
 
 					if options[:draw_answers]
 						@pdf.draw_text answer,
@@ -172,7 +189,7 @@ class BarcodePDF
 						#draw the annotation text
 						set_font options[:annotation_font]
 						if options[:draw_annotations]
-							@pdf.draw_text options[:annotations][i],
+							@pdf.draw_text options[:annotations][options[:language_toggle]][i],
 								:at => [options[:annotation_position][:x], options[:annotation_position][:y]]
 						end
 
@@ -222,7 +239,7 @@ class BarcodePDF
 
 						#draw the annotation text
 						set_font options[:annotation_font]
-						annotation = options[:annotations][i]
+						annotation = options[:annotations][options[:language_toggle]][i]
 						annotation_width = @pdf.width_of(annotation)
 						if options[:draw_annotations]
 							@pdf.draw_text annotation,
