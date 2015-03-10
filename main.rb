@@ -407,7 +407,7 @@ class BarcodePDF
 			:print_names => false,
 			:one_page_per_document => true,
 			:output_dir => 'output',
-			:new_page_options => {:template => 'PlickersBusinessCards.Frontside.FINAL.Nolan.redacted.pdf'}
+			:new_page_options => {:template => 'templates/PlickersBusinessCards.Frontside.FINAL.Nolan.redacted.pdf'}
 		}
 		options = default_options.merge(options)
 
