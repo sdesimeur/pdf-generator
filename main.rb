@@ -11,10 +11,10 @@ class BarcodePDF
 	def initialize(options={})
 		default_options = {
 			:page_size => {
-				:square_half_letter => [396, 396],
+				:square_half_letter => [72, 72],
 				:letter => [612, 792]
 			},
-			:page_size_toggle => :letter,
+			:page_size_toggle => :square_half_letter,
 			# drawing toggles
 			:draw_answers => true,
 			:draw_numbers => true,
@@ -23,30 +23,30 @@ class BarcodePDF
 			:draw_card_number_text => false,
 			# strings to print (one for each side)
 			:annotations => {
-				:english => ['www.plickers.com', 'version 1', '', ''],
+				:english => ['', '', '', ''],
 				:arabic => ['www.plickers.com', 'version 1', '', ''] #TODO 1 رادصإلا
 			},
 			:answers => {
 				:english => ['A', 'B', 'C', 'D'],
 				:arabic => ['أ', 'ب', 'ت', 'ث']
 			},
-			:language_toggle => :arabic,
+			:language_toggle => :english,
 			:numbers => ['?', '?', '?', '?'],
 			:names => ['', '', '', ''],
 			# font options
 			:annotation_font => {:color => 'cccccc', :size => 14, :face => 'GothamNarrowMedium'},
 			:answer_font => {
 				:normal => {:color => '999999', :size => 19, :face => 'GothamNarrowMedium'},
-				:large => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'}
+				:large => {:color => '999999', :size => 180, :face => 'GothamNarrowBook'}
 			},
-			:answer_font_toggle => :normal,
-			:number_font => {:color => '999999', :size => 28, :face => 'GothamNarrowBook'},
+			:answer_font_toggle => :large,
+			:number_font => {:color => '999999', :size => 120, :face => 'GothamNarrowBook'},
 			:card_number_text_font => {:color => 'c7e4d8', :size => 9, :face => 'LatoBold'},
 			:name_font => {:color => '999999', :size => 24, :face => 'GothamNarrowBook'},
 			# text box positions
 			:annotation_position => {:x => 6, :y => 10},
-			:answer_position => {:x => 0, :y => 10},
-			:number_position => {:x => -6, :y => 10},
+			:answer_position => {:x => 0, :y => 40},
+			:number_position => {:x => -6, :y => 40},
 			:name_position => {:x => 6, :y => 10},
 			# barcode parameters
 			:module_size => 100,
@@ -266,7 +266,7 @@ class BarcodePDF
 			# 1/page
 			:one_centered => {
 				:assembly_geometries => [
-					{:size => 50, :position => ['center_horizontally', 'center_vertically']}
+					{:size => 8.5, :position => ['center_horizontally', 'center_vertically']}
 				]
 			},
 			# 2/page
@@ -410,7 +410,7 @@ class BarcodePDF
 			}
 		}
 		default_options = {
-			:layout_configuration => :two_centered,
+			:layout_configuration => :one_centered,
 			:assembly_geometries => [
 				# TODO: uncomment?
 					{:size => 33, :position => [306, 396]}
@@ -419,7 +419,7 @@ class BarcodePDF
 				:module_size => 100,
 				:assembly_position => {}
 			},
-			:randomize_rotation => true, #[5, 10, 1, 2]
+			:randomize_rotation => false, #[5, 10, 1, 2]
 			:print_names => false,
 			:one_page_per_document => false,
 			:output_dir => '',
@@ -583,4 +583,4 @@ cards = [
 ###Test
 barcode = BarcodePDF.new()
 
-barcode.draw_card_set(cards[1..40])
+barcode.draw_card_set(cards[1..1])
