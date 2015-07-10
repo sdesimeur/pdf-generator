@@ -30,7 +30,7 @@ class BarcodePDF
 				:english => ['A', 'B', 'C', 'D'],
 				:arabic => ['أ', 'ب', 'ت', 'ث']
 			},
-			:language_toggle => :arabic,
+			:language_toggle => :english,
 			:numbers => ['?', '?', '?', '?'],
 			:names => ['', '', '', ''],
 			# font options
@@ -419,7 +419,7 @@ class BarcodePDF
 				:module_size => 100,
 				:assembly_position => {}
 			},
-			:randomize_rotation => true, #[5, 10, 1, 2]
+			:randomize_rotation => [5, 10, 0, 0],
 			:print_names => false,
 			:one_page_per_document => false,
 			:output_dir => '',
