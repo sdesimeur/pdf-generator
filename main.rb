@@ -12,7 +12,8 @@ class BarcodePDF
 		default_options = {
 			:page_size => {
 				:square_half_letter => [396, 396],
-				:letter => [612, 792]
+				:letter => [612, 792],
+				:a4 => [595, 842] # from https://www.gnu.org/software/gv/manual/html_node/Paper-Keywords-and-paper-size-in-points.html
 			},
 			:page_size_toggle => :letter,
 			# drawing toggles
@@ -121,7 +122,7 @@ class BarcodePDF
 		fills, options = {} #barcode fill-array
 	)
 		options = @options.merge(options)
-		page_size = [@pdf.page.size[0], @pdf.page.size[1]]
+		page_size = options[:page_size]
 
 		#draw the card number text
 		font = options[:card_number_text_font]
@@ -137,12 +138,7 @@ class BarcodePDF
 		module_size = options[:module_size]
 		barcode_width = barcode_height = module_size * MODULES_PER_SIDE
 		scale = options[:assembly_scale]
-		if(options[:assembly_position][:x] == "center_horizontally")
-			options[:assembly_position][:x] = page_size[0]/2
-		end
-		if(options[:assembly_position][:y] == "center_vertically")
-			options[:assembly_position][:y] = page_size[1]/2
-		end
+
 		@pdf.save_graphics_state
 		origin = [options[:assembly_position][:x],
 			page_size[1] - options[:assembly_position][:y] - barcode_height*scale]
@@ -272,8 +268,8 @@ class BarcodePDF
 			# 2/page
 			:two_centered => {
 				:assembly_geometries => [
-					{:size => 50, :position => [306, 198]},
-					{:size => 50, :position => [306, 594]}
+					{:size => 50, :position => ['center_horizontally', 'space_2_evenly']},
+					{:size => 50, :position => ['center_horizontally', 'space_2_evenly']}
 				]
 			},
 			# 4/page
@@ -468,10 +464,22 @@ class BarcodePDF
 			on_page_index = index % assemblies_per_page
 			assembly_geometry = options[:assembly_geometries][on_page_index]
 
+			options[:assembly_options][:page_size] = [@pdf.page.size[0], @pdf.page.size[1]];
+			page_size = options[:assembly_options][:page_size];
+
 			scale = assembly_geometry[:size].to_f / options[:assembly_options][:module_size]
 			options[:assembly_options][:assembly_scale] = scale
 			options[:assembly_options][:assembly_position][:x] = assembly_geometry[:position][0]
 			options[:assembly_options][:assembly_position][:y] = assembly_geometry[:position][1]
+
+			if(options[:assembly_options][:assembly_position][:x] == "center_horizontally")
+				options[:assembly_options][:assembly_position][:x] = 0.5 * page_size[0]
+			end
+			if(options[:assembly_options][:assembly_position][:y] == "center_vertically")
+				options[:assembly_options][:assembly_position][:y] = 0.5 * page_size[1]
+			elsif(options[:assembly_options][:assembly_position][:y] == "space_2_evenly")
+				options[:assembly_options][:assembly_position][:y] = ((on_page_index * 0.5) + 0.25) * page_size[1]
+			end
 
 			if(options[:randomize_rotation] === true)
 				options[:assembly_options][:assembly_rotation] = Random.rand(4)*90
