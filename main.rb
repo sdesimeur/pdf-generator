@@ -12,8 +12,8 @@ class BarcodePDF
 		default_options = {
 			:page_size => {
 				:square_half_letter => [396, 396],
-				:letter => [612, 792],
-				:a4 => [595, 842] # from https://www.gnu.org/software/gv/manual/html_node/Paper-Keywords-and-paper-size-in-points.html
+				:letter => 'LETTER',
+				:a4 => 'A4'
 			},
 			:page_size_toggle => :letter,
 			# drawing toggles
@@ -464,8 +464,8 @@ class BarcodePDF
 			on_page_index = index % assemblies_per_page
 			assembly_geometry = options[:assembly_geometries][on_page_index]
 
-			options[:assembly_options][:page_size] = [@pdf.page.size[0], @pdf.page.size[1]];
-			page_size = options[:assembly_options][:page_size];
+			options[:assembly_options][:page_size] = [@pdf.page.dimensions[2], @pdf.page.dimensions[3]]
+			page_size = options[:assembly_options][:page_size]
 
 			scale = assembly_geometry[:size].to_f / options[:assembly_options][:module_size]
 			options[:assembly_options][:assembly_scale] = scale
