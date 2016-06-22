@@ -471,7 +471,7 @@ class BarcodePDF
 			options[:assembly_options][:name] = name
 			draw_barcode_assembly(fills, options[:assembly_options])
 			if ((index + 1)%assemblies_per_page == 0 && options[:one_page_per_document])
-				save_document options[:output_dir] + "/" + page_number.to_s + ".pdf"
+				save_document options[:output_dir] + "/" + page_number.to_s.rjust(2, "0") + ".pdf"
 			end
 		end
 
